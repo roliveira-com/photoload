@@ -4,6 +4,26 @@ var closeCreatePostModalButton = document.querySelector('#close-create-post-moda
 
 function openCreatePostModal() {
   createPostArea.style.display = 'block';
+
+  // ***
+  // Aqui, disparamos a mesnagem de instalação usando o evento 'beforeinstallprompt'
+  // armazenado na variavel 'deferredPrompt'
+  // ***
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+
+    deferredPrompt.userChoice.then(function (choiceResult) {
+      console.log(choiceResult.outcome)
+
+      if (choiceResult.outcome == 'dismissed'){
+        console.log('usuário não aceitou instalação')
+      }else{
+        console.log('a instalação foi feita');
+      };
+
+      deferredPrompt = null;
+    })
+  }
 }
 
 function closeCreatePostModal() {
