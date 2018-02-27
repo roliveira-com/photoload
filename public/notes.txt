@@ -1,4 +1,0 @@
-# Sobre a propriedade 'scope' no manifest.json
-Esta propriedade definirá o escopo onde o service worker atuará. Usando o '.', definimos que o service workers poderá atuar
-em todos arquivos da aplicação. Já usando '/help/' ele só atuara na pasta help e etc. Está configuração pode ser sobreescrita
-pela configuração do próprio service worker
