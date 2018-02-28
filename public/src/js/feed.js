@@ -32,6 +32,7 @@ closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
 
 function createCard() {
   var cardWrapper = document.createElement('div');
+  cardWrapper.style.border = '3px solid rgb(63,81,181)'
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
   var cardTitle = document.createElement('div');
   cardTitle.className = 'mdl-card__title';
