@@ -1,17 +1,22 @@
+var VERSION = {
+  current : '1.15',
+  earlier : '1.2'
+}
 
 self.addEventListener('install', function(event) {
   // ***
   // a chamada para Caches é encapsulada em waitUntil() porque a chamada fetch pode acontecer antes
-  // do caacheamento de completar, isto daria erro já que erá feita uma chamada para o cache sem os 
+  // do cacheamento de completar, isto daria erro já que erá feita uma chamada para o cache sem os 
   // assets estarem nele ainda
   // ***
   event.waitUntil(
-    caches.open('photoload-files-v3')
+    caches.open('photoload-files-'+VERSION.current)
       .then(function(cache){
         console.log('[Service Worker] Instalando arquivos estáticos (App shell)')
         cache.addAll([
           '/',
           '/index.html',
+          '/offline.html',
           '/src/js/app.js',
           '/src/js/feed.js',
           '/src/js/promise.js',
@@ -33,7 +38,7 @@ self.addEventListener('activate', function(event) {
     caches.keys()
       .then(function(keyList) {
           return Promise.all(keyList.map(function(key){
-            if (key !== 'photoload-files-v3' && key !== 'photoload-dynamic'){
+            if (key !== 'photoload-files-'+VERSION.current && key !== 'photoload-dynamic-'+VERSION.current){
               console.log('[Service Worker] Removendo cache antigo: ', key)
               caches.delete(key);
             }
@@ -43,25 +48,102 @@ self.addEventListener('activate', function(event) {
   return self.clients.claim();
 });
 
-self.addEventListener('fetch', function(event) {
-  event.respondWith(
-    caches.match(event.request)
-      .then(function(response){
-        if (response) {
-          return response;
-        } else {
-          return fetch(event.request)
-            .then(function(res) {
-              return caches.open('photoload-dynamic')
-                .then(function(cache){
-                  cache.put(event.request, res.clone());
-                  return res;
-                })
-            })
-            .catch(function(err){
 
+self.addEventListener('fetch', function(event) {
+  var url = 'https://httpbin.org/get';
+
+  if (event.request.url.indexOf(url) > -1){
+    event.respondWith(
+      caches.open('photoload-dynamic-'+VERSION.current)
+        .then(function(cache){
+          return fetch(event.request)
+            .then(function(res){
+              cache.put(event.request, res.clone());
+              return res;
             })
-        }
-      })
-  );
+        })
+    );
+  }else{
+    event.respondWith(
+      caches.match(event.request)
+        .then(function(response){
+          if (response) {
+            return response;
+          } else {
+            return fetch(event.request)
+              .then(function(res) {
+                return caches.open('photoload-dynamic-'+VERSION.current)
+                  .then(function(cache){
+                    cache.put(event.request, res.clone());
+                    return res;
+                  })
+              })
+              .catch(function(err){
+                  return caches.open('photoload-files-'+VERSION.current)
+                    .then(function(cache){
+                        return cache.match('/offline.html');
+                    })
+              })
+            }
+          })
+    )
+  }
 });
+
+// Estratégia Cache First com Network Fallback
+// self.addEventListener('fetch', function(event) {
+//   event.respondWith(
+//     caches.match(event.request)
+//       .then(function(response){
+//         if (response) {
+//           return response;
+//         } else {
+//           return fetch(event.request)
+//             .then(function(res) {
+//               return caches.open('photoload-dynamic-'+VERSION.current)
+//                 .then(function(cache){
+//                   // cache.put(event.request, res.clone());
+//                   return res;
+//                 })
+//             })
+//             .catch(function(err){
+//                 return caches.open('photoload-files-'+VERSION.current)
+//                   .then(function(cache){
+//                       return cache.match('/offline.html');
+//                   })
+//             })
+//         }
+//       })
+//   );
+// });
+
+// Estratégia Cache Only
+// self.addEventListener('fetch', function(event) {
+//   event.respondWith(
+//     caches.match(event.request)
+//   );
+// });
+
+// Estratégia Network Only
+// self.addEventListener('fetch', function(event) {
+//   event.respondWith(
+//     fetch(event.request)
+//   );
+// });
+
+// Estratégia Network First com Cache Fallback
+// self.addEventListener('fetch', function(event) {
+//   event.respondWith(
+//     fetch(event.request)
+//       .then(function(res){
+//         return caches.open('photoload-dynamic-'+VERSION.current)
+//           .then(function(cache){
+//             cache.put(event.request, res.clone());
+//             return res;
+//           })
+//       })
+//       .catch(function(err){
+//         return caches.match(event.request)
+//       })
+//   );
+// });

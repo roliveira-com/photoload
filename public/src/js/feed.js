@@ -30,12 +30,30 @@ shareImageButton.addEventListener('click', openCreatePostModal);
 
 closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
 
+function onSaveButtonClicked(evt){
+  console.log('Botão save clicado');
+  if('caches' in window){
+    caches.open('photoload-user')
+      .then(function(cache){
+        cache.add('https://httpbin.org/get');
+        cache.add('/src/images/sf-boat.jpg');
+      })
+  }
+}
+
+function clearCards(){
+  while(sharedMomentsArea.hasChildNodes()){
+    sharedMomentsArea.removeChild(sharedMomentsArea.lastChild);
+  }
+}
+
 function createCard() {
   var cardWrapper = document.createElement('div');
   cardWrapper.style.border = '3px solid rgb(63,81,181)'
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
   var cardTitle = document.createElement('div');
   cardTitle.className = 'mdl-card__title';
+  cardTitle.style.color = 'white';
   cardTitle.style.backgroundImage = 'url("/src/images/sf-boat.jpg")';
   cardTitle.style.backgroundSize = 'cover';
   cardTitle.style.height = '180px';
@@ -48,15 +66,40 @@ function createCard() {
   cardSupportingText.className = 'mdl-card__supporting-text';
   cardSupportingText.textContent = 'In San Francisco';
   cardSupportingText.style.textAlign = 'center';
+  // var cardSaveButton = document.createElement('button')
+  // cardSaveButton.textContent = 'save';
+  // cardSaveButton.addEventListener('click', onSaveButtonClicked)
+  // cardSupportingText.appendChild(cardSaveButton)
   cardWrapper.appendChild(cardSupportingText);
   componentHandler.upgradeElement(cardWrapper);
   sharedMomentsArea.appendChild(cardWrapper);
 }
+
+var networkDataReceived = false;
 
 fetch('https://httpbin.org/get')
   .then(function(res) {
     return res.json();
   })
   .then(function(data) {
+    networkDataReceived = true
+    console.log('Dados da web', data);
+    clearCards()
     createCard();
   });
+
+if ('caches' in window){
+  caches.match('https://httpbin.org/get')
+    .then(function(response){
+      if(response){
+        return response.json();
+      }
+    })
+    .then(function(data){
+      console.log('Dados do cache', data);
+      if(!networkDataReceived){
+        clearCards()
+        createCard();
+      }
+    })
+}
