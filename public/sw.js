@@ -1,7 +1,24 @@
 var VERSION = {
-  current : '1.15',
+  current : '1.18',
   earlier : '1.2'
 }
+var CACHE_STATIC = 'photoload-files-v15';
+var CACHE_DYNAMIC = 'photoload-dynamic-v15';
+var STATIC_FILES = [
+  '/',
+  '/index.html',
+  '/offline.html',
+  '/src/js/app.js',
+  '/src/js/feed.js',
+  '/src/js/promise.js',
+  '/src/js/material.min.js',
+  '/src/css/app.css',
+  '/src/css/feed.css',
+  '/src/images/main-image.jpg',
+  'https://fonts.googleapis.com/css?family=Roboto:400,700',
+  'https://fonts.googleapis.com/icon?family=Material+Icons',
+  'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
+]
 
 self.addEventListener('install', function(event) {
   // ***
@@ -13,21 +30,7 @@ self.addEventListener('install', function(event) {
     caches.open('photoload-files-'+VERSION.current)
       .then(function(cache){
         console.log('[Service Worker] Instalando arquivos estáticos (App shell)')
-        cache.addAll([
-          '/',
-          '/index.html',
-          '/offline.html',
-          '/src/js/app.js',
-          '/src/js/feed.js',
-          '/src/js/promise.js',
-          '/src/js/material.min.js',
-          '/src/css/app.css',
-          '/src/css/feed.css',
-          '/src/images/main-image.jpg',
-          'https://fonts.googleapis.com/css?family=Roboto:400,700',
-          'https://fonts.googleapis.com/icon?family=Material+Icons',
-          'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
-        ]);
+        cache.addAll(STATIC_FILES);
       })
   );
 });
@@ -63,7 +66,14 @@ self.addEventListener('fetch', function(event) {
             })
         })
     );
-  }else{
+  } else if (new RegExp('\\b' + STATIC_FILES.join('\\b|\\b') + '\\b').test(event.request.url)){
+    self.addEventListener('fetch', function(event) {
+      event.respondWith(
+        caches.match(event.request)
+      );
+      console.log('arquivos estáticos vindos do cache')
+    });
+  } else {
     event.respondWith(
       caches.match(event.request)
         .then(function(response){
@@ -81,7 +91,9 @@ self.addEventListener('fetch', function(event) {
               .catch(function(err){
                   return caches.open('photoload-files-'+VERSION.current)
                     .then(function(cache){
-                        return cache.match('/offline.html');
+                      if (event.request.url.indexOf('/help')){
+                        return cache.match('/offline.html')
+                      }
                     })
               })
             }
