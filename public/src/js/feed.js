@@ -12,14 +12,26 @@ function openCreatePostModal() {
       console.log(choiceResult.outcome);
 
       if (choiceResult.outcome === 'dismissed') {
-        console.log('User cancelled installation');
+        console.log('Instalação cancelada pelo usuário');
       } else {
-        console.log('User added to home screen');
+        console.log('Instalação aceita pelo usuário');
       }
     });
-
     deferredPrompt = null;
   }
+  // ***
+  // Deletando o service worker
+  // ***
+  // if ('serviceWorker' in navigator){
+  //   navigator.serviceWorker.getRegistrations()
+  //   .then(function (registrations) {
+  //     console.log('Service Workers resgistrados: ',registrations)
+  //     for (var i = 0; i < registrations.length; i++) {
+  //       registrations[i].unregister()
+  //     }
+  //   })
+  // }
+
 }
 
 function closeCreatePostModal() {

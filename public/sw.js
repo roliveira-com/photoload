@@ -1,5 +1,5 @@
 var VERSION = {
-  current : '1.18',
+  current : '1.19',
   earlier : '1.2'
 }
 var CACHE_STATIC = 'photoload-files-v15';
@@ -35,6 +35,19 @@ self.addEventListener('install', function(event) {
   );
 });
 
+function trimCache(cacheName, maxItems) {
+  caches.open(cacheName)
+    .then(function (caches) {
+      cache.keys();
+    })
+    .then(function (keys) {
+      if(keys.length > maxItems){
+        cache.remove(keys[0])
+          .then(trimCache(cacheName, maxItems))
+      }
+    })
+}
+
 self.addEventListener('activate', function(event) {
   console.log('[Service Worker] Ativando o Service Worker', event)
   event.waitUntil(
@@ -51,6 +64,25 @@ self.addEventListener('activate', function(event) {
   return self.clients.claim();
 });
 
+// function isInArray(string, array){
+//   for(var i = 0; i < array.length; i++){
+//     if (array[i] === string){
+//       return true
+//     }
+//   }
+//   return false
+// }
+
+function isInArray(string, array) {
+  var cachePath;
+  if (string.indexOf(self.origin) === 0) { // request targets domain where we serve the page from (i.e. NOT a CDN)
+    console.log('matched ', string);
+    cachePath = string.substring(self.origin.length); // take the part of the URL AFTER the domain (e.g. after localhost:8080)
+  } else {
+    cachePath = string; // store the full request (for CDNs)
+  }
+  return array.indexOf(cachePath) > -1;
+}
 
 self.addEventListener('fetch', function(event) {
   var url = 'https://httpbin.org/get';
@@ -66,7 +98,7 @@ self.addEventListener('fetch', function(event) {
             })
         })
     );
-  } else if (new RegExp('\\b' + STATIC_FILES.join('\\b|\\b') + '\\b').test(event.request.url)){
+  } else if (isInArray(event.request.url, STATIC_FILES)){
     self.addEventListener('fetch', function(event) {
       event.respondWith(
         caches.match(event.request)
@@ -81,6 +113,7 @@ self.addEventListener('fetch', function(event) {
             return response;
           } else {
             return fetch(event.request)
+            // trimCache('photoload-dynamic-'+VERSION.current, 3)
               .then(function(res) {
                 return caches.open('photoload-dynamic-'+VERSION.current)
                   .then(function(cache){
@@ -91,7 +124,7 @@ self.addEventListener('fetch', function(event) {
               .catch(function(err){
                   return caches.open('photoload-files-'+VERSION.current)
                     .then(function(cache){
-                      if (event.request.url.indexOf('/help')){
+                      if (event.request.headers.get('accept').includes('text/html')){
                         return cache.match('/offline.html')
                       }
                     })
