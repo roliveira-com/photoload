@@ -59,24 +59,24 @@ function clearCards(){
   }
 }
 
-function createCard() {
+function createCard(data) {
   var cardWrapper = document.createElement('div');
   cardWrapper.style.border = '3px solid rgb(63,81,181)'
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
   var cardTitle = document.createElement('div');
   cardTitle.className = 'mdl-card__title';
   cardTitle.style.color = 'white';
-  cardTitle.style.backgroundImage = 'url("/src/images/sf-boat.jpg")';
+  cardTitle.style.backgroundImage = 'url("'+data.image+'")';
   cardTitle.style.backgroundSize = 'cover';
   cardTitle.style.height = '180px';
   cardWrapper.appendChild(cardTitle);
   var cardTitleTextElement = document.createElement('h2');
   cardTitleTextElement.className = 'mdl-card__title-text';
-  cardTitleTextElement.textContent = 'San Francisco Trip';
+  cardTitleTextElement.textContent = data.title;
   cardTitle.appendChild(cardTitleTextElement);
   var cardSupportingText = document.createElement('div');
   cardSupportingText.className = 'mdl-card__supporting-text';
-  cardSupportingText.textContent = 'In San Francisco';
+  cardSupportingText.textContent = data.location;
   cardSupportingText.style.textAlign = 'center';
   // var cardSaveButton = document.createElement('button')
   // cardSaveButton.textContent = 'save';
@@ -89,19 +89,29 @@ function createCard() {
 
 var networkDataReceived = false;
 
-fetch('https://httpbin.org/get')
+function updateUI(data) {
+  for (let i = 0; i < data.length; i++) {
+    clearCards()
+    createCard(data[i])
+  }
+}
+
+fetch('https://photoload-98c58.firebaseio.com/posts.json')
   .then(function(res) {
     return res.json();
   })
   .then(function(data) {
     networkDataReceived = true
     console.log('Dados da web', data);
-    clearCards()
-    createCard();
+    var dataArray = []
+    for (var key in data) {
+      dataArray.push(data[key])
+    }
+    updateUI(dataArray);
   });
 
 if ('caches' in window){
-  caches.match('https://httpbin.org/get')
+  caches.match('https://photoload-98c58.firebaseio.com/posts.json')
     .then(function(response){
       if(response){
         return response.json();
@@ -110,8 +120,11 @@ if ('caches' in window){
     .then(function(data){
       console.log('Dados do cache', data);
       if(!networkDataReceived){
-        clearCards()
-        createCard();
+        var dataArray = []
+        for (var key in data) {
+          dataArray.push(data[key])
+        }
+        updateUI(dataArray);
       }
     })
 }

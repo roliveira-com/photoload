@@ -1,5 +1,5 @@
 var VERSION = {
-  current : '1.19',
+  current : '1.21',
   earlier : '1.2'
 }
 var CACHE_STATIC = 'photoload-files-v15';
@@ -85,7 +85,7 @@ function isInArray(string, array) {
 }
 
 self.addEventListener('fetch', function(event) {
-  var url = 'https://httpbin.org/get';
+  var url = 'https://photoload-98c58.firebaseio.com/posts.json';
 
   if (event.request.url.indexOf(url) > -1){
     event.respondWith(
