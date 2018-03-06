@@ -53,12 +53,14 @@ function onSaveButtonClicked(evt){
   }
 }
 
+// Removendo todos os cards da tela
 function clearCards(){
   while(sharedMomentsArea.hasChildNodes()){
     sharedMomentsArea.removeChild(sharedMomentsArea.lastChild);
   }
 }
 
+// Criando os cards
 function createCard(data) {
   var cardWrapper = document.createElement('div');
   cardWrapper.style.border = '3px solid rgb(63,81,181)'
@@ -87,8 +89,8 @@ function createCard(data) {
   sharedMomentsArea.appendChild(cardWrapper);
 }
 
-var networkDataReceived = false;
 
+// Quando os dados são recebidos, esta funcção trata de popular os cards e inderi-los na UI, atualizando a view
 function updateUI(data) {
   for (let i = 0; i < data.length; i++) {
     clearCards()
@@ -96,6 +98,12 @@ function updateUI(data) {
   }
 }
 
+// ***
+// SALVANDO DADOS NO CacheStorage COM NETWORK fallback
+// ***
+// Variável que indica se o request dos dados para API foi feito
+var networkDataReceived = false;
+// Aqui, fazemos uma requisição para obter os dados da API e inserimos na tela... 
 fetch('https://photoload-98c58.firebaseio.com/posts.json')
   .then(function(res) {
     return res.json();
@@ -110,21 +118,46 @@ fetch('https://photoload-98c58.firebaseio.com/posts.json')
     updateUI(dataArray);
   });
 
-if ('caches' in window){
-  caches.match('https://photoload-98c58.firebaseio.com/posts.json')
-    .then(function(response){
-      if(response){
-        return response.json();
-      }
-    })
-    .then(function(data){
-      console.log('Dados do cache', data);
-      if(!networkDataReceived){
-        var dataArray = []
-        for (var key in data) {
-          dataArray.push(data[key])
-        }
-        updateUI(dataArray);
-      }
-    })
+// *** 
+// USANDO O CACHE STORAGE
+// ***
+// ...Enquanto a requisição ocorre ,consultamos para ver se o browser da suporte 
+// ao cacheStorage e tambem consultamos para ver se esta requisição já está armazenada...
+
+// if ('caches' in window){
+//   caches.match('https://photoload-98c58.firebaseio.com/posts.json')
+//     .then(function(response){
+//       if(response){
+//         return response.json();
+//       }
+//     })
+//     .then(function(data){
+//       console.log('Dados do cache (Cache Storage)', data);
+
+// ...caso esta requisição esteja armazenada no cache e nenhum dado da rede foi recebido
+// indicado pela variável 'networkDataReceived'. Atualizamos a UI com os dados do cache...
+
+  //     if(!networkDataReceived){
+  //       var dataArray = []
+  //       for (var key in data) {
+  //         dataArray.push(data[key])
+  //       }
+  //       updateUI(dataArray);
+  //     }
+  //   })
+  // }
+// ...embora esta ação do cache seja concluida antes da resposta da rede, quando a resposta da rede for concluida
+// ela sobre escreverá esta ação do cache, mantendo sempre a UI atualizada com os dados mais atualizados
+
+
+// ***
+// USANDO o INDEXDB
+// ***
+if ('indexedDB' in window){
+  readAllData('posts').then(function(data){
+    if(!networkDataReceived){
+      console.log('Dados do cache (IndexDB)', data);
+      updateUI(data);
+    }
+  })
 }

@@ -1,7 +1,8 @@
 importScripts('/src/js/idb.js');
+importScripts('/src/js/utils.js');
 
 var VERSION = {
-  current : '1.23',
+  current : '1.29',
   earlier : '1.2'
 }
 var CACHE_STATIC = 'photoload-files-v15';
@@ -12,6 +13,7 @@ var STATIC_FILES = [
   '/offline.html',
   '/src/js/app.js',
   '/src/js/idb.js',
+  '/src/js/utils.js',
   '/src/js/feed.js',
   '/src/js/promise.js',
   '/src/js/material.min.js',
@@ -44,6 +46,11 @@ self.addEventListener('install', function(event) {
   );
 });
 
+// ***
+// (BUG: Não está removendo os arquivos)
+// Função que limita a quantidade de requisições armazenadas no cache
+// Se tiver mais que o maxItems ela deleta os arquivos mais antigos
+// ***
 function trimCache(cacheName, maxItems) {
   caches.open(cacheName)
     .then(function (caches) {
@@ -73,6 +80,11 @@ self.addEventListener('activate', function(event) {
   return self.clients.claim();
 });
 
+// ***
+// Função que verifica se a url do request está no array de arquivos
+// estáticos para guardar no cache
+// ***
+// V1 da função
 // function isInArray(string, array){
 //   for(var i = 0; i < array.length; i++){
 //     if (array[i] === string){
@@ -81,7 +93,7 @@ self.addEventListener('activate', function(event) {
 //   }
 //   return false
 // }
-
+// V2 da função que trata tb os requests por CDN
 function isInArray(string, array) {
   var cachePath;
   if (string.indexOf(self.origin) === 0) { // request targets domain where we serve the page from (i.e. NOT a CDN)
@@ -94,28 +106,32 @@ function isInArray(string, array) {
 }
 
 // ***
-// Usando o indexDB para armazenar dados de post
+// Estratégia de Cache First com Network Fallback
 // ***
+// Usando o indexDB para armazenar dados de post
 self.addEventListener('fetch', function (event) {
   var url = 'https://photoload-98c58.firebaseio.com/posts.json';
 
+  // verifica se este request interceptado é a url acima, 
+  // que busca os dados da API e se positivo...
   if (event.request.url.indexOf(url) > -1) {
     event.respondWith(
+      // ...é feita a rquisição ao servidor e...
       fetch(event.request).then(function(res){
-        var clonedRes = res.clone();
+        var clonedRes = res.clone(); // é necessário clonar a resposta já que ela não pode ser usada mais que 1 vez
+        // ...guardamos a resposta em cache (indexDB)...
         clonedRes.json().then(function(data){
           for(var key in data){
-            dbPromise.then(function(index_db){
-              var transaction = index_db.transaction('posts', 'readwrite');
-              var store = transaction.objectStore('posts');
-              store.put(data[key]);
-              return transaction.complete;
-            })
+            // ...usando a função writeData() em ultils.js
+            writeData('posts',data[key])
           }
         })
+        // ...e por fim devolvemos a resposa da requisição. Mas ...
         return res;
       })
     );
+  // ...caso a requisição esteja no array que lista os arquivos e esta 
+  // requisição esteja armazenada no cache, devolvemos este arquivos. Mas...
   } else if (isInArray(event.request.url, STATIC_FILES)) {
     self.addEventListener('fetch', function (event) {
       event.respondWith(
@@ -123,26 +139,35 @@ self.addEventListener('fetch', function (event) {
       );
       console.log('arquivos estáticos vindos do cache')
     });
+
+  // ... caso a requisição não seja feita para API e nem esteja listada
+  // dentre os arquivos estáticos...
   } else {
     event.respondWith(
+      // ...buscamos no cache para ver se esta requisição já foi armazenada anteriormente...
       caches.match(event.request)
         .then(function (response) {
+          // ..caso positivo retornamos a resposta. Mas caso negativo...
           if (response) {
             return response;
           } else {
+            // ...fazemos a requisição para a url do request...
             return fetch(event.request)
-              // trimCache('photoload-dynamic-'+VERSION.current, 3)
               .then(function (res) {
+                // ...e guardamos e resposta no Cache Storage e...
                 return caches.open('photoload-dynamic-' + VERSION.current)
                   .then(function (cache) {
                     cache.put(event.request, res.clone());
                     return res;
                   })
               })
+              // ...caso o request dê erro..
               .catch(function (err) {
                 return caches.open('photoload-files-' + VERSION.current)
                   .then(function (cache) {
-                    if (event.request.headers.get('accept').includes('text/html')) {
+                    // ...verificamos se este request contem uma requisição para um documento html...
+                    if (event.request.headers.get('accept').includes('text/html')) { // neste ponto podemos checar qualuer outro tipo de arquivo: css, js, etc
+                      // ..e retornamos a página customizada de erro
                       return cache.match('/offline.html')
                     }
                   })
@@ -153,6 +178,7 @@ self.addEventListener('fetch', function (event) {
   }
 });
 
+// Usando o Cache Storage para armazenar dados de post
 // self.addEventListener('fetch', function(event) {
 //   var url = 'https://photoload-98c58.firebaseio.com/posts.json';
 
