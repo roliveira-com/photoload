@@ -1,5 +1,7 @@
+importScripts('/src/js/idb.js');
+
 var VERSION = {
-  current : '1.21',
+  current : '1.23',
   earlier : '1.2'
 }
 var CACHE_STATIC = 'photoload-files-v15';
@@ -9,6 +11,7 @@ var STATIC_FILES = [
   '/index.html',
   '/offline.html',
   '/src/js/app.js',
+  '/src/js/idb.js',
   '/src/js/feed.js',
   '/src/js/promise.js',
   '/src/js/material.min.js',
@@ -19,6 +22,12 @@ var STATIC_FILES = [
   'https://fonts.googleapis.com/icon?family=Material+Icons',
   'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
 ]
+
+var dbPromise = idb.open('post-store', 1, function (db) {
+  if(!db.objectStoreNames.contains('posts')){
+    db.createObjectStore('posts', { keyPath: 'id' });
+  };
+});
 
 self.addEventListener('install', function(event) {
   // ***
@@ -84,22 +93,31 @@ function isInArray(string, array) {
   return array.indexOf(cachePath) > -1;
 }
 
-self.addEventListener('fetch', function(event) {
+// ***
+// Usando o indexDB para armazenar dados de post
+// ***
+self.addEventListener('fetch', function (event) {
   var url = 'https://photoload-98c58.firebaseio.com/posts.json';
 
-  if (event.request.url.indexOf(url) > -1){
+  if (event.request.url.indexOf(url) > -1) {
     event.respondWith(
-      caches.open('photoload-dynamic-'+VERSION.current)
-        .then(function(cache){
-          return fetch(event.request)
-            .then(function(res){
-              cache.put(event.request, res.clone());
-              return res;
+      fetch(event.request).then(function(res){
+        var clonedRes = res.clone();
+        clonedRes.json().then(function(data){
+          for(var key in data){
+            dbPromise.then(function(index_db){
+              var transaction = index_db.transaction('posts', 'readwrite');
+              var store = transaction.objectStore('posts');
+              store.put(data[key]);
+              return transaction.complete;
             })
+          }
         })
+        return res;
+      })
     );
-  } else if (isInArray(event.request.url, STATIC_FILES)){
-    self.addEventListener('fetch', function(event) {
+  } else if (isInArray(event.request.url, STATIC_FILES)) {
+    self.addEventListener('fetch', function (event) {
       event.respondWith(
         caches.match(event.request)
       );
@@ -108,32 +126,83 @@ self.addEventListener('fetch', function(event) {
   } else {
     event.respondWith(
       caches.match(event.request)
-        .then(function(response){
+        .then(function (response) {
           if (response) {
             return response;
           } else {
             return fetch(event.request)
-            // trimCache('photoload-dynamic-'+VERSION.current, 3)
-              .then(function(res) {
-                return caches.open('photoload-dynamic-'+VERSION.current)
-                  .then(function(cache){
+              // trimCache('photoload-dynamic-'+VERSION.current, 3)
+              .then(function (res) {
+                return caches.open('photoload-dynamic-' + VERSION.current)
+                  .then(function (cache) {
                     cache.put(event.request, res.clone());
                     return res;
                   })
               })
-              .catch(function(err){
-                  return caches.open('photoload-files-'+VERSION.current)
-                    .then(function(cache){
-                      if (event.request.headers.get('accept').includes('text/html')){
-                        return cache.match('/offline.html')
-                      }
-                    })
+              .catch(function (err) {
+                return caches.open('photoload-files-' + VERSION.current)
+                  .then(function (cache) {
+                    if (event.request.headers.get('accept').includes('text/html')) {
+                      return cache.match('/offline.html')
+                    }
+                  })
               })
-            }
-          })
+          }
+        })
     )
   }
 });
+
+// self.addEventListener('fetch', function(event) {
+//   var url = 'https://photoload-98c58.firebaseio.com/posts.json';
+
+//   if (event.request.url.indexOf(url) > -1){
+//     event.respondWith(
+//       caches.open('photoload-dynamic-'+VERSION.current)
+//         .then(function(cache){
+//           return fetch(event.request)
+//             .then(function(res){
+//               cache.put(event.request, res.clone());
+//               return res;
+//             })
+//         })
+//     );
+//   } else if (isInArray(event.request.url, STATIC_FILES)){
+//     self.addEventListener('fetch', function(event) {
+//       event.respondWith(
+//         caches.match(event.request)
+//       );
+//       console.log('arquivos estáticos vindos do cache')
+//     });
+//   } else {
+//     event.respondWith(
+//       caches.match(event.request)
+//         .then(function(response){
+//           if (response) {
+//             return response;
+//           } else {
+//             return fetch(event.request)
+//             // trimCache('photoload-dynamic-'+VERSION.current, 3)
+//               .then(function(res) {
+//                 return caches.open('photoload-dynamic-'+VERSION.current)
+//                   .then(function(cache){
+//                     cache.put(event.request, res.clone());
+//                     return res;
+//                   })
+//               })
+//               .catch(function(err){
+//                   return caches.open('photoload-files-'+VERSION.current)
+//                     .then(function(cache){
+//                       if (event.request.headers.get('accept').includes('text/html')){
+//                         return cache.match('/offline.html')
+//                       }
+//                     })
+//               })
+//             }
+//           })
+//     )
+//   }
+// });
 
 // Estratégia Cache First com Network Fallback
 // self.addEventListener('fetch', function(event) {
