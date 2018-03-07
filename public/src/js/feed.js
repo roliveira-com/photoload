@@ -92,8 +92,8 @@ function createCard(data) {
 
 // Quando os dados são recebidos, esta funcção trata de popular os cards e inderi-los na UI, atualizando a view
 function updateUI(data) {
+  clearCards();
   for (let i = 0; i < data.length; i++) {
-    clearCards()
     createCard(data[i])
   }
 }
@@ -116,6 +116,7 @@ fetch('https://photoload-98c58.firebaseio.com/posts.json')
       dataArray.push(data[key])
     }
     updateUI(dataArray);
+    console.info('data array', dataArray)
   });
 
 // *** 

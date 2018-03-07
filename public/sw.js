@@ -2,7 +2,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/utils.js');
 
 var VERSION = {
-  current : '1.29',
+  current : '1.30',
   earlier : '1.2'
 }
 var CACHE_STATIC = 'photoload-files-v15';
@@ -119,11 +119,19 @@ self.addEventListener('fetch', function (event) {
       // ...é feita a rquisição ao servidor e...
       fetch(event.request).then(function(res){
         var clonedRes = res.clone(); // é necessário clonar a resposta já que ela não pode ser usada mais que 1 vez
+        // ...limpamos o indexDB para ter certeza que todas os dados serão atualizados...
+        clearStorage('posts').then(function(){
+          return clonedRes.json();
+        })
         // ...guardamos a resposta em cache (indexDB)...
-        clonedRes.json().then(function(data){
+        .then(function(data){
           for(var key in data){
             // ...usando a função writeData() em ultils.js
             writeData('posts',data[key])
+              // Deletando um item específico do indexDB
+              // .then(function () {
+              //   clearStorageItem('posts', key);
+              // })
           }
         })
         // ...e por fim devolvemos a resposa da requisição. Mas ...
