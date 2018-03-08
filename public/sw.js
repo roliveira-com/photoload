@@ -2,7 +2,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/utils.js');
 
 var VERSION = {
-  current : '1.30',
+  current : '1.32',
   earlier : '1.2'
 }
 var CACHE_STATIC = 'photoload-files-v15';

@@ -9,6 +9,8 @@
   background: white;
   text-align: center;
   display: none;
+  transform: translateY(100vh);
+  transition: transform ease-in-out .3s;
 }
 
 .main-image {
