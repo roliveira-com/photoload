@@ -203,7 +203,7 @@ form.addEventListener('submit', function (evt) {
         location: locationInput.value
       };
       writeData('sync-posts', post).then(function() {
-        sw.sync.register('sync-new-post');
+        sw.sync.register('sync-new-posts');
       }).then(function () {
         var snackbarContainer = document.querySelector('#confirmation-toast');
         var data = {message: 'Seu post foi salvo para ser sincronizado mais tarde'};

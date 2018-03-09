@@ -2,7 +2,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/utils.js');
 
 var VERSION = {
-  current : '1.30',
+  current : '1.34',
   earlier : '1.2'
 }
 var CACHE_STATIC = 'photoload-files-v15';
@@ -295,3 +295,37 @@ self.addEventListener('fetch', function (event) {
 //       })
 //   );
 // });
+
+self.addEventListener('sync', function (event) {
+  console.log('[Service Worker] Sincronizando dados]', event);
+  if (event.tag === 'sync-new-posts'){
+    console.log('[Service Worker] SIncronizando novos posts]');
+    event.waitUntil(
+      readAllData('sync-posts').then(function(posts){
+        for (var post of posts){
+          fetch('https://photoload-98c58.firebaseio.com/posts.json', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+              id: post.id,
+              title: post.title,
+              location: post.location,
+              image: 'https://picsum.photos/400/300?image=898'
+            })
+          }).then(function (res) {
+            console.log('[Service Workers] Post '+post.id+ ' enviado para o servidor', res);
+            if(res.ok){
+              console.log('[Service Workers] Post ' + post.id + ' foi salvo!');
+              clearStorageItem('sync-posts', post.id)
+            }
+          }).catch(function(err){
+            console.log('[Service Workers] Erro ao enviar o post ' + post.id + '!', err);
+          })
+        } // for loop
+      }) // readAllData() promise
+    ) // waitUntil()
+  } // if()
+});
