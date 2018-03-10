@@ -2,7 +2,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/utils.js');
 
 var VERSION = {
-  current : '1.34',
+  current : '1.35',
   earlier : '1.2'
 }
 var CACHE_STATIC = 'photoload-files-v15';
@@ -303,7 +303,7 @@ self.addEventListener('sync', function (event) {
     event.waitUntil(
       readAllData('sync-posts').then(function(posts){
         for (var post of posts){
-          fetch('https://photoload-98c58.firebaseio.com/posts.json', {
+          fetch('https://us-central1-photoload-98c58.cloudfunctions.net/storePostData', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -319,7 +319,9 @@ self.addEventListener('sync', function (event) {
             console.log('[Service Workers] Post '+post.id+ ' enviado para o servidor', res);
             if(res.ok){
               console.log('[Service Workers] Post ' + post.id + ' foi salvo!');
-              clearStorageItem('sync-posts', post.id)
+              res.json().then(function(res_data){
+                clearStorageItem('sync-posts', res_data.id);
+              })
             }
           }).catch(function(err){
             console.log('[Service Workers] Erro ao enviar o post ' + post.id + '!', err);

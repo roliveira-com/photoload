@@ -167,7 +167,7 @@ if ('indexedDB' in window){
 }
 
 function sendData() {
-  fetch('https://photoload-98c58.firebaseio.com/posts.json', {
+  fetch('https://us-central1-photoload-98c58.cloudfunctions.net/storePostData', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

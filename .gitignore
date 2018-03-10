@@ -1,2 +1,5 @@
 .idea
 node_modules/
+photoload_key.json
+firebase-debug.log
+npm-debug.log
