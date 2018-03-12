@@ -2,7 +2,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/utils.js');
 
 var VERSION = {
-  current : '1.39',
+  current : '1.41',
   earlier : '1.2'
 }
 var CACHE_STATIC = 'photoload-files-v15';
@@ -342,5 +342,10 @@ self.addEventListener('notificationclick', function(evt){
     notification.close();
   }else{
     console.log(action);
+    notification.close();
   }
+});
+
+self.addEventListener('notificationclose', function(evt){
+  console.log('[Service Worker] Usuário fechou a notificação', evt)
 })

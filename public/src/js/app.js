@@ -51,12 +51,35 @@ function displayConfirmNotification(){
   // new Notification('Notificações Habilitadas com sucesso!', options);
 }
 
+// function configurePushSub(){
+//   if(!('serviceWorker' in navigator)) {
+//     return
+//   }
+
+//   var reg;
+//   navigator.serviceWorker.ready
+//     .then(function(worker){
+//       reg = worker
+//       return worker.pushManager.getSubscription();
+//     })
+//     .then(function(sub){
+//       if(sub == null){
+//         reg.pushManager.subscribe({
+//           userVisibleOnly: true
+//         })
+//       } else {
+
+//       }
+//     })
+// }
+
 function askForNotificationPermission() {
   Notification.requestPermission(function (result) {
     console.log('Escolha do usuário para notificaçoes: ', result)
     if(result !== 'granted'){
       console.log('Usuário não concedeu permissões para notificação', result);
     }else {
+      // configurePushSub();
       displayConfirmNotification();
     }
   })
