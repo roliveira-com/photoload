@@ -2,7 +2,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/utils.js');
 
 var VERSION = {
-  current : '1.32',
+  current : '1.39',
   earlier : '1.2'
 }
 var CACHE_STATIC = 'photoload-files-v15';
@@ -97,7 +97,6 @@ self.addEventListener('activate', function(event) {
 function isInArray(string, array) {
   var cachePath;
   if (string.indexOf(self.origin) === 0) { // request targets domain where we serve the page from (i.e. NOT a CDN)
-    console.log('matched ', string);
     cachePath = string.substring(self.origin.length); // take the part of the URL AFTER the domain (e.g. after localhost:8080)
   } else {
     cachePath = string; // store the full request (for CDNs)
@@ -145,8 +144,8 @@ self.addEventListener('fetch', function (event) {
       event.respondWith(
         caches.match(event.request)
       );
-      console.log('arquivos estáticos vindos do cache')
     });
+    console.log('[Service Worker] arquivos estáticos vindos do cache')
 
   // ... caso a requisição não seja feita para API e nem esteja listada
   // dentre os arquivos estáticos...
@@ -295,3 +294,53 @@ self.addEventListener('fetch', function (event) {
 //       })
 //   );
 // });
+
+self.addEventListener('sync', function (event) {
+  console.log('[Service Worker] Sincronizando dados]', event);
+  if (event.tag === 'sync-new-posts'){
+    console.log('[Service Worker] SIncronizando novos posts]');
+    event.waitUntil(
+      readAllData('sync-posts').then(function(posts){
+        for (var post of posts){
+          fetch('https://us-central1-photoload-98c58.cloudfunctions.net/storePostData', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+              id: post.id,
+              title: post.title,
+              location: post.location,
+              image: 'https://picsum.photos/400/300?image=898'
+            })
+          }).then(function (res) {
+            console.log('[Service Workers] Post '+post.id+ ' enviado para o servidor', res);
+            if(res.ok){
+              console.log('[Service Workers] Post ' + post.id + ' foi salvo!');
+              res.json().then(function(res_data){
+                clearStorageItem('sync-posts', res_data.id);
+              })
+            }
+          }).catch(function(err){
+            console.log('[Service Workers] Erro ao enviar o post ' + post.id + '!', err);
+          })// ENF OF fetch() promise
+        } // ENF OF for loop
+      }) // ENF OF readAllData() promise
+    ) // ENF OF waitUntil()
+  } // ENF OF if()
+});
+
+self.addEventListener('notificationclick', function(evt){
+  var notification = evt.notification;
+  var action = evt.action;
+
+  console.log(notification);
+
+  if(action == 'confirm'){
+    console.log('Usuário confirmou ação')
+    notification.close();
+  }else{
+    console.log(action);
+  }
+})

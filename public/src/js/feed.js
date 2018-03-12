@@ -123,7 +123,6 @@ fetch('https://photoload-98c58.firebaseio.com/posts.json')
       dataArray.push(data[key])
     }
     updateUI(dataArray);
-    console.info('data array', dataArray)
   });
 
 // *** 
@@ -171,7 +170,7 @@ if ('indexedDB' in window){
 }
 
 function sendData() {
-  fetch('https://photoload-98c58.firebaseio.com/posts.json', {
+  fetch('https://us-central1-photoload-98c58.cloudfunctions.net/storePostData', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -207,7 +206,7 @@ form.addEventListener('submit', function (evt) {
         location: locationInput.value
       };
       writeData('sync-posts', post).then(function() {
-        sw.sync.register('sync-new-post');
+        sw.sync.register('sync-new-posts');
       }).then(function () {
         var snackbarContainer = document.querySelector('#confirmation-toast');
         var data = {message: 'Seu post foi salvo para ser sincronizado mais tarde'};
