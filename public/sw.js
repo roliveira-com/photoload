@@ -2,7 +2,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/utils.js');
 
 var VERSION = {
-  current : '1.35',
+  current : '1.39',
   earlier : '1.2'
 }
 var CACHE_STATIC = 'photoload-files-v15';
@@ -97,7 +97,6 @@ self.addEventListener('activate', function(event) {
 function isInArray(string, array) {
   var cachePath;
   if (string.indexOf(self.origin) === 0) { // request targets domain where we serve the page from (i.e. NOT a CDN)
-    console.log('matched ', string);
     cachePath = string.substring(self.origin.length); // take the part of the URL AFTER the domain (e.g. after localhost:8080)
   } else {
     cachePath = string; // store the full request (for CDNs)
@@ -145,8 +144,8 @@ self.addEventListener('fetch', function (event) {
       event.respondWith(
         caches.match(event.request)
       );
-      console.log('arquivos estáticos vindos do cache')
     });
+    console.log('[Service Worker] arquivos estáticos vindos do cache')
 
   // ... caso a requisição não seja feita para API e nem esteja listada
   // dentre os arquivos estáticos...
@@ -325,9 +324,23 @@ self.addEventListener('sync', function (event) {
             }
           }).catch(function(err){
             console.log('[Service Workers] Erro ao enviar o post ' + post.id + '!', err);
-          })
-        } // for loop
-      }) // readAllData() promise
-    ) // waitUntil()
-  } // if()
+          })// ENF OF fetch() promise
+        } // ENF OF for loop
+      }) // ENF OF readAllData() promise
+    ) // ENF OF waitUntil()
+  } // ENF OF if()
 });
+
+self.addEventListener('notificationclick', function(evt){
+  var notification = evt.notification;
+  var action = evt.action;
+
+  console.log(notification);
+
+  if(action == 'confirm'){
+    console.log('Usuário confirmou ação')
+    notification.close();
+  }else{
+    console.log(action);
+  }
+})
