@@ -51,13 +51,58 @@ function displayConfirmNotification(){
   // new Notification('Notificações Habilitadas com sucesso!', options);
 }
 
+function configureWebPush(){
+  if(!('serviceWorker' in navigator)){
+    return
+  }
+
+  var reg;
+  navigator.serviceWorker.ready
+    .then(function (worker) {
+      reg = worker;
+      return reg.pushManager.getSubscription();
+    })
+    .then(function (sub) {
+      if(sub === null){
+        var vapidPublicKey = 'BApQasJCUpay-LJiLY0wze_7E2iVyXoQ9sNtGNwR1BpwDtmDfL0nL7THitENo-9msuq5vwZqcV2SpWmDQO5FiEk';
+        var convertedPublicKey = urlBase64ToUint8Array(vapidPublicKey);
+        return reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: convertedPublicKey
+        })
+      } else {
+        // nada
+      }
+    })
+    .then(function (newSub) {
+      console.log('Inscrição no Push criada', newSub)
+      fetch('https://photoload-98c58.firebaseio.com/subscriptions.json',{
+        method: 'POST',
+        headers: {
+          'Content-Type' : 'application/json',
+          'Accept' : 'application/json'
+        },
+        body: JSON.stringify(newSub)
+      })
+      .then(function(res) {
+        if(res.ok){
+          console.log('Inscrição do Push salva!')
+          displayConfirmNotification();
+        }
+      })
+    })
+    .catch(function (err) {
+      console.log(err);
+    })
+}
+
 function askForNotificationPermission() {
   Notification.requestPermission(function (result) {
     console.log('Escolha do usuário para notificaçoes: ', result)
     if(result !== 'granted'){
       console.log('Usuário não concedeu permissões para notificação', result);
     }else {
-      displayConfirmNotification();
+      configureWebPush();
     }
   })
 }
