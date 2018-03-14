@@ -2,7 +2,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/utils.js');
 
 var VERSION = {
-  current : '1.41',
+  current : '1.42',
   earlier : '1.2'
 }
 var CACHE_STATIC = 'photoload-files-v15';
@@ -348,4 +348,24 @@ self.addEventListener('notificationclick', function(evt){
 
 self.addEventListener('notificationclose', function(evt){
   console.log('[Service Worker] Usuário fechou a notificação', evt)
+})
+
+self.addEventListener('push', function (event) {
+  console.log('Nova Notificação Push recebida!', event);
+
+  var data = { title: 'Novo!', content: 'Você tem atualizações!' };
+
+  if (event.data) {
+    data = JSON.parse(event.data.text())
+  };
+
+  var options = {
+    body: data.content,
+    icon: '/src/images/icons/app-icon-96x96.png',
+    badge: '/src/images/icons/app-icon-96x96.png'
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  )
 })

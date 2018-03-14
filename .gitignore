@@ -1,5 +1,6 @@
 .idea
 node_modules/
 photoload_key.json
+webpushprivate_key.js
 firebase-debug.log
 npm-debug.log

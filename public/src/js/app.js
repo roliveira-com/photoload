@@ -71,7 +71,8 @@ function configureWebPush(){
           applicationServerKey: convertedPublicKey
         })
       } else {
-        // nada
+          new Notification('Você já possui inscrição para nossas push messages');
+          return;
       }
     })
     .then(function (newSub) {
