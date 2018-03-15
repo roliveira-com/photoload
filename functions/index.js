@@ -23,7 +23,8 @@ exports.storePostData = functions.https.onRequest(function(req, res) {
       location: req.body.location,
       image: req.body.image
     })
-    .then(function(){
+    .then(function(resp){
+      console.log('Resposta do push da base: ',resp)
       webpush.setVapidDetails(
         'mailto:rodrigo.olive@gmail.com',
         'BApQasJCUpay-LJiLY0wze_7E2iVyXoQ9sNtGNwR1BpwDtmDfL0nL7THitENo-9msuq5vwZqcV2SpWmDQO5FiEk',
@@ -41,10 +42,16 @@ exports.storePostData = functions.https.onRequest(function(req, res) {
           }
         };
 
-        webpush.sendNotification(pushConfig, JSON.stringify({title: 'Novo post', content: 'Novo post adicionado!'}))
-          .catch(function(err){
-            console.error(err);
-          })
+        webpush.sendNotification(pushConfig, JSON.stringify(
+        {
+          title: 'Novo post', 
+          content: 'Novo post adicionado!',
+          url: '/help'
+        }
+        ))
+        .catch(function(err){
+          console.error(err);
+        })
       });
       res.status(201).json({message: 'Data stored', id: req.body.id});
     })

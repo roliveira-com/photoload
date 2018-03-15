@@ -2,7 +2,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/utils.js');
 
 var VERSION = {
-  current : '1.42',
+  current : '1.46',
   earlier : '1.2'
 }
 var CACHE_STATIC = 'photoload-files-v15';
@@ -342,7 +342,22 @@ self.addEventListener('notificationclick', function(evt){
     notification.close();
   }else{
     console.log(action);
-    notification.close();
+    evt.waitUntil(
+      clients.matchAll().then(function(clis){
+        var client = clis.find(function(c){
+          return c.visibilityState === 'visible';
+        })
+
+        if(client !== undefined){
+          client.navigate(notification.data.url);
+          client.focus();
+        }else{
+          clients.openWindow(notification.data.url)
+        }
+        notification.close();
+      })
+    )
+
   }
 });
 
@@ -353,7 +368,7 @@ self.addEventListener('notificationclose', function(evt){
 self.addEventListener('push', function (event) {
   console.log('Nova Notificação Push recebida!', event);
 
-  var data = { title: 'Novo!', content: 'Você tem atualizações!' };
+  var data = { title: 'Novo!', content: 'Você tem atualizações!', url: '/' };
 
   if (event.data) {
     data = JSON.parse(event.data.text())
@@ -362,7 +377,10 @@ self.addEventListener('push', function (event) {
   var options = {
     body: data.content,
     icon: '/src/images/icons/app-icon-96x96.png',
-    badge: '/src/images/icons/app-icon-96x96.png'
+    badge: '/src/images/icons/app-icon-96x96.png',
+    data: {
+      url: data.url
+    }
   };
 
   event.waitUntil(
