@@ -16,6 +16,14 @@ function writeData(st, data){
   })
 }
 
+function readItem(st, id){
+  return dbPromise.then(function(index_db){
+    var transaction = index_db.transaction(st, 'readonly');
+    var store = transaction.objectStore(st);
+    return store.get(id);
+  })
+}
+
 function readAllData(st){
   return dbPromise.then(function(db){
     var transaction = db.transaction(st, 'readonly');

@@ -112,6 +112,5 @@ if ('Notification' in window){
   for (let i = 0; i < enableNotificationBtn.length; i++) {
     enableNotificationBtn[i].style.display = 'inline-block';
     enableNotificationBtn[i].addEventListener('click', askForNotificationPermission);
-    
   }
 }

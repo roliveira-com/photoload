@@ -124,6 +124,7 @@ fetch('https://photoload-98c58.firebaseio.com/posts.json')
       dataArray.push(data[key])
     }
     updateUI(dataArray);
+    bindCardDetailsListener();
   });
 
 // *** 

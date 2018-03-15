@@ -17,14 +17,14 @@ admin.initializeApp({
 
 exports.storePostData = functions.https.onRequest(function(req, res) {
   cors(req, res, function () {
-    admin.database().ref('posts').push({
-      id: req.body.id,
+    var newPost = admin.database().ref('posts').push()
+    newPost.set({
+      id: newPost.key,
       title: req.body.title,
       location: req.body.location,
       image: req.body.image
     })
-    .then(function(resp){
-      console.log('Resposta do push da base: ',resp)
+    .then(function(){
       webpush.setVapidDetails(
         'mailto:rodrigo.olive@gmail.com',
         'BApQasJCUpay-LJiLY0wze_7E2iVyXoQ9sNtGNwR1BpwDtmDfL0nL7THitENo-9msuq5vwZqcV2SpWmDQO5FiEk',
@@ -46,7 +46,8 @@ exports.storePostData = functions.https.onRequest(function(req, res) {
         {
           title: 'Novo post', 
           content: 'Novo post adicionado!',
-          url: '/help'
+          url: '/help',
+          postkey: newPost.key
         }
         ))
         .catch(function(err){

@@ -1,9 +1,10 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utils.js');
+importScripts('/src/js/detail.js');
 
 var VERSION = {
-  current : '1.46',
-  earlier : '1.2'
+  current : '1.74',
+  earlier : '1.68'
 }
 var CACHE_STATIC = 'photoload-files-v15';
 var CACHE_DYNAMIC = 'photoload-dynamic-v15';
@@ -319,6 +320,7 @@ self.addEventListener('sync', function (event) {
             if(res.ok){
               console.log('[Service Workers] Post ' + post.id + ' foi salvo!');
               res.json().then(function(res_data){
+                writeData('posts', res_data);
                 clearStorageItem('sync-posts', res_data.id);
               })
             }
@@ -349,10 +351,16 @@ self.addEventListener('notificationclick', function(evt){
         })
 
         if(client !== undefined){
-          client.navigate(notification.data.url);
+          // client.navigate(notification.data.url);
+          createPostDetailCard(notification.data.postkey);
+          openDetailModal();
+          console.log('Post Key vindo do push', notification.data.postkey);
           client.focus();
         }else{
-          clients.openWindow(notification.data.url)
+          // clients.openWindow(notification.data.url);
+          createPostDetailCard(notification.data.postkey);
+          openDetailModal();
+          console.log('Post Key vindo do push', notification.data.postkey);
         }
         notification.close();
       })
@@ -379,7 +387,8 @@ self.addEventListener('push', function (event) {
     icon: '/src/images/icons/app-icon-96x96.png',
     badge: '/src/images/icons/app-icon-96x96.png',
     data: {
-      url: data.url
+      url: data.url,
+      postkey: data.postkey
     }
   };
 
