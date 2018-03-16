@@ -42,32 +42,44 @@ function createPostDetailCard(data) {
   var cardPostDetailColumn = document.createElement('div');
   cardPostDetailColumn.className = 'mdl-cell mdl-cell--12-col text-center';
 
-  var cardPostDetailTitle = document.createElement('h3');
+  var cardPostDetailTitle = document.createElement('h4');
   cardPostDetailTitle.textContent = data.title;
+
+  var cardPostDetaillocation = document.createElement('p');
+  cardPostDetaillocation.textContent = data.location;
 
   var cardPostDetailImage = document.createElement('div');
   cardPostDetailImage.className = 'post-detail__image';
-  cardPostDetailImage.style.width = '300px';
-  cardPostDetailImage.style.height = '180px';
   cardPostDetailImage.style.backgroundImage = 'url("'+data.image+'")';
+
+  var cardPostDetailClose = document.createElement('button')
+  cardPostDetailClose.className = 'mdl-button mdl-js-button mdl-button--fab'
+  cardPostDetailClose.setAttribute('id', 'close-detail-post-modal-btn');
+  cardPostDetailClose.innerHTML = '<i class="material-icons">close</i>'
 
   cardPostDetailColumn.appendChild(cardPostDetailTitle);
   cardPostDetailColumn.appendChild(cardPostDetailImage);
+  cardPostDetailColumn.appendChild(cardPostDetaillocation);
+  cardPostDetailColumn.appendChild(cardPostDetailClose);
   cardPostDetailWrapper.appendChild(cardPostDetailColumn);
+
   postDetail.appendChild(cardPostDetailWrapper);
 
+  bindPostDetailModalCloseButton();
 }
 
 function openDetailModal() {
-  postDetail.style.display = 'block';
+  postDetail.style.transform = 'translateY(0)';
+}
 
-  setTimeout(function(){
-    postDetail.style.transform = 'translateY(0)';
-  },1)
-
+function bindPostDetailModalCloseButton(){
+  var closePostDetailModalButton = document.querySelector('#close-detail-post-modal-btn'); 
+  if (closePostDetailModalButton){
+    closePostDetailModalButton.addEventListener('click', closeDetailModal);
+  }
 }
 
 function closeDetailModal() {
-  cardDetail.style.transform = 'translateY(100vh)';
-  cardDetail.style.display = 'none';
+  postDetail.style.transform = 'translateY(100vh)';
+  postDetail.innerHTML = '';
 }

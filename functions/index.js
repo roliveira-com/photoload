@@ -3,7 +3,7 @@ var admin = require('firebase-admin');
 var cors = require('cors')({origin:true});
 var webpush = require('web-push');
 
-var Post = require('./model/post.model');
+var post = require('./model/post.model');
 var serviceAccount = require('./photoload_key.json');
 var webPushPrivateKey = require('./webpushprivate_key');
 
@@ -19,13 +19,14 @@ admin.initializeApp({
 exports.storePostData = functions.https.onRequest(function(req, res) {
   cors(req, res, function () {
     var newPost = admin.database().ref('posts').push()
-    // var postData = new Post.novoPost(newPost.key, req.body.title, req.body.location, req.body.image);
-    var postData = {
-      id: newPost.key,
-      title: req.body.title,
-      location: req.body.location,
-      image: req.body.image      
-    }
+    var postData = new post.Novo(newPost.key, req.body.title, req.body.location, req.body.image);
+    console.info('Objeto postData', postData)
+    // var postData = {
+    //   id: newPost.key,
+    //   title: req.body.title,
+    //   location: req.body.location,
+    //   image: req.body.image      
+    // }
     newPost.set(postData)
     .then(function(){
       webpush.setVapidDetails(

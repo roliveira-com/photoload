@@ -1,4 +1,4 @@
-exports.novoPost = function(id, title, location, image){
+exports.Novo = function(id, title, location, image){
   return {
     id: id,
     title: title,

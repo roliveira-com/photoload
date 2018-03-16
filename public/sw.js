@@ -2,7 +2,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/utils.js');
 
 var VERSION = {
-  current : '1.83',
+  current : '1.91',
   earlier : '1.68'
 }
 var CACHE_STATIC = 'photoload-files-v15';
@@ -315,18 +315,18 @@ self.addEventListener('sync', function (event) {
               image: 'https://picsum.photos/400/300?image=898'
             })
           }).then(function (res) {
-            console.log('[Service Workers] Post '+post.id+ ' enviado para o servidor', res);
+            console.log('[Service Workers] Um Novo Post foi enviado para o servidor', res);
             if(res.ok){
-              console.log('[Service Workers] Post ' + post.id + ' foi salvo!');
+              console.log('[Service Workers] Post ' + res.id + ' foi salvo!');
               res.json().then(function(res_data){
                 writeData('posts', res_data).then(function(data_saved){
                   console.log('post salvo no indexDB: ', res_data);
                 })
-                clearStorageItem('sync-posts', res_data.id);
+                clearStorageItem('sync-posts', post.id);
               })
             }
           }).catch(function(err){
-            console.log('[Service Workers] Erro ao enviar o post ' + post.id + '!', err);
+            console.log('[Service Workers] Erro ao enviar o post !', err);
           })// ENF OF fetch() promise
         } // ENF OF for loop
       }) // ENF OF readAllData() promise
@@ -349,12 +349,10 @@ self.addEventListener('notificationclick', function(evt){
     console.log('Usuário confirmou ação')
     notification.close();
   }else{
-    console.log(action);
     evt.waitUntil(
       clients.matchAll().then(function(clis){
 
         clis.forEach(function(theClient){
-          console.log('Cliente: ', theClient);
           sendMessageToClient(theClient, notification.data.postkey);
         })
 

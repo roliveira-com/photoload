@@ -23,9 +23,15 @@
   top: 56px;
   background: white;
   text-align: center;
-  display: none;
+  display: flex;
   transform: translateY(100vh);
   transition: transform ease-in-out .3s; 
+}
+
+.post-detail__image{
+  height: 180px;
+  margin: 0 auto;
+  width: 300px;
 }
 
 .main-image {
