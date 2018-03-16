@@ -1,9 +1,8 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utils.js');
-importScripts('/src/js/detail.js');
 
 var VERSION = {
-  current : '1.74',
+  current : '1.87',
   earlier : '1.68'
 }
 var CACHE_STATIC = 'photoload-files-v15';
@@ -351,15 +350,11 @@ self.addEventListener('notificationclick', function(evt){
         })
 
         if(client !== undefined){
-          // client.navigate(notification.data.url);
-          createPostDetailCard(notification.data.postkey);
-          openDetailModal();
+          postDetailModalFromPush(notification.data.postkey);
           console.log('Post Key vindo do push', notification.data.postkey);
           client.focus();
         }else{
-          // clients.openWindow(notification.data.url);
-          createPostDetailCard(notification.data.postkey);
-          openDetailModal();
+          postDetailModalFromPush(notification.data.postkey);
           console.log('Post Key vindo do push', notification.data.postkey);
         }
         notification.close();

@@ -5,11 +5,62 @@ var sharedMomentsArea = document.querySelector('#shared-moments');
 var form = document.querySelector('form');
 var titleInput = document.querySelector('#title');
 var locationInput = document.querySelector('#location');
+var videoPlayer = document.querySelector('#player');
+var canvasElement = document.querySelector('#canvas');
+var captureButton = document.querySelector('#capture-btn');
+var imagePicker = document.querySelector('#image-picker');
+var imagePickerArea = document.querySelector('#pick-image');
+
+function initMedia() {
+  if (!('mediaDevices' in navigator)){
+    navigator.mediaDevices = {};
+  }
+
+  if(!('getUserMedia' in navigator.mediaDevices)){
+    navigator.mediaDevices.getUserMedia = function (contraints) {
+      var getUserMedia = navigator.webkitGetUserMedia || navigator.mpzGetUserMedia;
+
+      if(!getUserMedia){
+        return Promise.reject(new Error('getUserMedia não implementado'))
+      }
+
+      return new Promise(function (resolve, reject) {
+        getUserMedia.call(navigator, constrants, resolve, reject);
+      });
+    }
+  }
+
+  navigator.mediaDevices.getUserMedia({video:true,audio:true})
+    .then(function(stream){
+      videoPlayer.srcObject = stream;
+      videoPlayer.style.display = 'block';
+    })
+    .catch(function (err) {
+      imagePickerArea.style.display = 'block';
+    });
+}
+
+captureButton.addEventListener('click',function (evt) {
+  canvasElement.style.display = 'block';
+  videoPlayer.style.display = 'none';
+  captureButton.style.display = 'none';
+  var context = canvasElement.getContext('2d');
+  context.drawImage(videoPlayer, 0, 0, canvas.with, videoPlayer.videoHeight / (videoPlayer.videoWidth / canvas.width));
+  videoPlayer.srcObject.getVideoTracks().forEach(function (track) {
+    console.log('track: ', track)
+    track.stop();
+  });
+  videoPlayer.srcObject.getAudioTracks().forEach(function (track) {
+    console.log('track: ', track)
+    track.stop();
+  });
+});
 
 function openCreatePostModal() {
   createPostArea.style.display = 'block';
   setTimeout(function(){
     createPostArea.style.transform = 'translateY(0)';
+    initMedia();
   },1)
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -42,6 +93,9 @@ function openCreatePostModal() {
 
 function closeCreatePostModal() {
   createPostArea.style.transform = 'translateY(100vh)';
+  videoPlayer.style.display = 'none';
+  imagePickerArea.style.display = 'none';
+  canvasElement.style.display = 'none'
   createPostArea.style.display = 'none';
 }
 
@@ -70,7 +124,6 @@ function clearCards(){
 // Criando os cards
 function createCard(data) {
   var cardWrapper = document.createElement('div');
-  cardWrapper.style.border = '3px solid rgb(63,81,181)'
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
   cardWrapper.setAttribute('id', data.id);
   var cardTitle = document.createElement('div');
