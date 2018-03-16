@@ -3,6 +3,6 @@ exports.Novo = function(id, title, location, image){
     id: id,
     title: title,
     location: location,
-    image: image
+    picture: image
   }
 }

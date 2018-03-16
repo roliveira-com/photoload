@@ -10,6 +10,7 @@ var canvasElement = document.querySelector('#canvas');
 var captureButton = document.querySelector('#capture-btn');
 var imagePicker = document.querySelector('#image-picker');
 var imagePickerArea = document.querySelector('#pick-image');
+var picture = undefined;
 
 function initMedia() {
   if (!('mediaDevices' in navigator)){
@@ -45,7 +46,7 @@ captureButton.addEventListener('click',function (evt) {
   videoPlayer.style.display = 'none';
   captureButton.style.display = 'none';
   var context = canvasElement.getContext('2d');
-  context.drawImage(videoPlayer, 0, 0, canvas.with, videoPlayer.videoHeight / (videoPlayer.videoWidth / canvas.width));
+  context.drawImage(videoPlayer, 0, 0, canvas.width, videoPlayer.videoHeight / (videoPlayer.videoWidth / canvas.width));
   videoPlayer.srcObject.getVideoTracks().forEach(function (track) {
     console.log('track: ', track)
     track.stop();
@@ -54,6 +55,7 @@ captureButton.addEventListener('click',function (evt) {
     console.log('track: ', track)
     track.stop();
   });
+  picture = dataURItoBlob(canvasElement.toDataURL());
 });
 
 function openCreatePostModal() {
@@ -129,7 +131,7 @@ function createCard(data) {
   var cardTitle = document.createElement('div');
   cardTitle.className = 'mdl-card__title';
   cardTitle.style.color = 'white';
-  cardTitle.style.backgroundImage = 'url("'+data.image+'")';
+  cardTitle.style.backgroundImage = 'url("'+data.picture+'")';
   cardTitle.style.backgroundSize = 'cover';
   cardTitle.style.height = '180px';
   cardWrapper.appendChild(cardTitle);
@@ -225,18 +227,26 @@ if ('indexedDB' in window){
 }
 
 function sendData() {
+  var postDataId = new Date().toISOString()
+  var postData = new FormData();
+  postData.append('id', postDataId);
+  postData.append('title', titleInput.value);
+  postData.append('location', locationInput.value);
+  postData.append('file', picture, postDataId+'.png');
+
   fetch('https://us-central1-photoload-98c58.cloudfunctions.net/storePostData', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    body: JSON.stringify({
-      id: new Date().toISOString(),
-      title: titleInput.value,
-      location: locationInput.value,
-      image: 'https://picsum.photos/400/300?image=898'
-    })
+    body: postData
+    // headers: {
+    //   'Content-Type': 'application/json',
+    //   'Accept': 'application/json'
+    // },
+    // body: JSON.stringify({
+    //   id: new Date().toISOString(),
+    //   title: titleInput.value,
+    //   location: locationInput.value,
+    //   image: 'https://picsum.photos/400/300?image=898'
+    // })
   }).then(function (data) {
     console.log('Dados enviados', data);
     updateUI();
@@ -258,7 +268,8 @@ form.addEventListener('submit', function (evt) {
       var post = {
         id: new Date().toISOString(),
         title: titleInput.value,
-        location: locationInput.value
+        location: locationInput.value,
+        picture: picture
       };
       writeData('sync-posts', post).then(function() {
         sw.sync.register('sync-new-posts');

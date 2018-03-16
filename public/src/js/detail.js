@@ -50,7 +50,7 @@ function createPostDetailCard(data) {
 
   var cardPostDetailImage = document.createElement('div');
   cardPostDetailImage.className = 'post-detail__image';
-  cardPostDetailImage.style.backgroundImage = 'url("'+data.image+'")';
+  cardPostDetailImage.style.backgroundImage = 'url("'+data.picture+'")';
 
   var cardPostDetailClose = document.createElement('button')
   cardPostDetailClose.className = 'mdl-button mdl-js-button mdl-button--fab'

@@ -2,8 +2,8 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/utils.js');
 
 var VERSION = {
-  current : '1.91',
-  earlier : '1.68'
+  current : '1.102',
+  earlier : '1.99'
 }
 var CACHE_STATIC = 'photoload-files-v15';
 var CACHE_DYNAMIC = 'photoload-dynamic-v15';
@@ -302,18 +302,24 @@ self.addEventListener('sync', function (event) {
     event.waitUntil(
       readAllData('sync-posts').then(function(posts){
         for (var post of posts){
+          var postData = new FormData();
+          postData.append('id', post.id);
+          postData.append('title', post.title);
+          postData.append('location', post.location);
+          postData.append('file', post.picture, post.id+'.png');
           fetch('https://us-central1-photoload-98c58.cloudfunctions.net/storePostData', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-              id: post.id,
-              title: post.title,
-              location: post.location,
-              image: 'https://picsum.photos/400/300?image=898'
-            })
+            body: postData
+            // headers: {
+            //   'Content-Type': 'application/json',
+            //   'Accept': 'application/json'
+            // },
+            // body: JSON.stringify({
+            //   id: post.id,
+            //   title: post.title,
+            //   location: post.location,
+            //   image: 'https://picsum.photos/400/300?image=898'
+            // })
           }).then(function (res) {
             console.log('[Service Workers] Um Novo Post foi enviado para o servidor', res);
             if(res.ok){
