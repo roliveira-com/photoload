@@ -1,9 +1,8 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utils.js');
-importScripts('/src/js/detail.js');
 
 var VERSION = {
-  current : '1.74',
+  current : '1.83',
   earlier : '1.68'
 }
 var CACHE_STATIC = 'photoload-files-v15';
@@ -320,7 +319,9 @@ self.addEventListener('sync', function (event) {
             if(res.ok){
               console.log('[Service Workers] Post ' + post.id + ' foi salvo!');
               res.json().then(function(res_data){
-                writeData('posts', res_data);
+                writeData('posts', res_data).then(function(data_saved){
+                  console.log('post salvo no indexDB: ', res_data);
+                })
                 clearStorageItem('sync-posts', res_data.id);
               })
             }
@@ -339,6 +340,11 @@ self.addEventListener('notificationclick', function(evt){
 
   console.log(notification);
 
+  // var novoPostEvent = new CustomEvent("createPostModal", {
+  //   detail: {
+  //     postKey: notification.data.postkey
+  //   }
+  // });
   if(action == 'confirm'){
     console.log('Usuário confirmou ação')
     notification.close();
@@ -346,20 +352,20 @@ self.addEventListener('notificationclick', function(evt){
     console.log(action);
     evt.waitUntil(
       clients.matchAll().then(function(clis){
+
+        clis.forEach(function(theClient){
+          console.log('Cliente: ', theClient);
+          sendMessageToClient(theClient, notification.data.postkey);
+        })
+
         var client = clis.find(function(c){
           return c.visibilityState === 'visible';
         })
 
-        if(client !== undefined){
-          // client.navigate(notification.data.url);
-          createPostDetailCard(notification.data.postkey);
-          openDetailModal();
+        if(client !== undefined){      
           console.log('Post Key vindo do push', notification.data.postkey);
           client.focus();
         }else{
-          // clients.openWindow(notification.data.url);
-          createPostDetailCard(notification.data.postkey);
-          openDetailModal();
           console.log('Post Key vindo do push', notification.data.postkey);
         }
         notification.close();

@@ -67,3 +67,20 @@ function urlBase64ToUint8Array(base64String) {
   }
   return outputArray;
 }
+
+function sendMessageToClient(client, msg){
+  console.log('Setando o PostMessage(): ', msg)
+  return new Promise(function(resolve, reject){
+      var msg_chan = new MessageChannel();
+
+      msg_chan.port1.onmessage = function(event){
+          if(event.data.error){
+              reject(event.data.error);
+          }else{
+              resolve(event.data);
+          }
+      };
+
+      client.postMessage(msg, [msg_chan.port2]);
+  });
+}

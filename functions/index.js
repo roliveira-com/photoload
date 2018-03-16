@@ -3,6 +3,7 @@ var admin = require('firebase-admin');
 var cors = require('cors')({origin:true});
 var webpush = require('web-push');
 
+var Post = require('./model/post.model');
 var serviceAccount = require('./photoload_key.json');
 var webPushPrivateKey = require('./webpushprivate_key');
 
@@ -18,12 +19,14 @@ admin.initializeApp({
 exports.storePostData = functions.https.onRequest(function(req, res) {
   cors(req, res, function () {
     var newPost = admin.database().ref('posts').push()
-    newPost.set({
+    // var postData = new Post.novoPost(newPost.key, req.body.title, req.body.location, req.body.image);
+    var postData = {
       id: newPost.key,
       title: req.body.title,
       location: req.body.location,
-      image: req.body.image
-    })
+      image: req.body.image      
+    }
+    newPost.set(postData)
     .then(function(){
       webpush.setVapidDetails(
         'mailto:rodrigo.olive@gmail.com',
@@ -45,7 +48,7 @@ exports.storePostData = functions.https.onRequest(function(req, res) {
         webpush.sendNotification(pushConfig, JSON.stringify(
         {
           title: 'Novo post', 
-          content: 'Novo post adicionado!',
+          content: req.body.title,
           url: '/help',
           postkey: newPost.key
         }
@@ -54,7 +57,7 @@ exports.storePostData = functions.https.onRequest(function(req, res) {
           console.error(err);
         })
       });
-      res.status(201).json({message: 'Data stored', id: req.body.id});
+      res.status(201).json(postData);
     })
     .catch(function (err) {
       res.status(500).json({error: err});
