@@ -10,7 +10,44 @@ var canvasElement = document.querySelector('#canvas');
 var captureButton = document.querySelector('#capture-btn');
 var imagePicker = document.querySelector('#image-picker');
 var imagePickerArea = document.querySelector('#pick-image');
+var locationBtn = document.querySelector('#location-btn');
+var locationLoader = document.querySelector('#location-loader');
 var picture = undefined;
+var fetchedLocation = undefined;
+
+locationBtn.addEventListener('click', function (evt) {
+  if (!('geolocation' in navigator)) {
+    return
+  }  
+
+  locationBtn.style.display = 'none';
+  locationLoader.style.display = 'block';
+
+  navigator.geolocation.getCurrentPosition(function (position) {
+    locationBtn.style.display = 'inline';
+    locationLoader.style.display = 'none';
+    fetchedLocation = {
+      lat: position.coords.latitude,
+      lon: position.coords.longitude
+    };
+    locationInput.value = 'In Sao Paulo'
+    document.querySelector('#manual-location').classList.add('is-focused');
+  }, function (err) {
+    console.log(err)
+    locationBtn.style.display = 'inline';
+    locationLoader.style.display = 'none';
+    fetchedLocation = {
+      lat: null,
+      lon: null
+    };
+  }, {timeout: 10000})
+})
+
+function initLocation() {
+  if(!('geolocation' in navigator)){
+    locationBtn.style.display = 'none';
+  }
+}
 
 function initMedia() {
   if (!('mediaDevices' in navigator)){
@@ -31,7 +68,8 @@ function initMedia() {
     }
   }
 
-  navigator.mediaDevices.getUserMedia({video:true,audio:true})
+  // navigator.mediaDevices.getUserMedia({video:true,audio:true})
+  navigator.mediaDevices.getUserMedia({video:true})
     .then(function(stream){
       videoPlayer.srcObject = stream;
       videoPlayer.style.display = 'block';
@@ -51,18 +89,23 @@ captureButton.addEventListener('click',function (evt) {
     console.log('track: ', track)
     track.stop();
   });
-  videoPlayer.srcObject.getAudioTracks().forEach(function (track) {
-    console.log('track: ', track)
-    track.stop();
-  });
+  // videoPlayer.srcObject.getAudioTracks().forEach(function (track) {
+  //   console.log('track: ', track)
+  //   track.stop();
+  // });
   picture = dataURItoBlob(canvasElement.toDataURL());
 });
+
+imagePicker.addEventListener('change',function(evt){
+  picture = evt.target.files[0];
+})
 
 function openCreatePostModal() {
   createPostArea.style.display = 'block';
   setTimeout(function(){
     createPostArea.style.transform = 'translateY(0)';
     initMedia();
+    initLocation();
   },1)
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -94,11 +137,21 @@ function openCreatePostModal() {
 }
 
 function closeCreatePostModal() {
-  createPostArea.style.transform = 'translateY(100vh)';
+  setTimeout(function(){
+    createPostArea.style.transform = 'translateY(100vh)';
+  }, 1);
   videoPlayer.style.display = 'none';
   imagePickerArea.style.display = 'none';
   canvasElement.style.display = 'none'
   createPostArea.style.display = 'none';
+  locationBtn.style.display = 'inline';
+  captureButton.style.inline = 'inline';
+  // locationLoader.style.display = 'none';
+  if (videoPlayer.srcObject){
+    videoPlayer.srcObject.getVideoTracks().forEach(function (track) {
+      track.stop();
+    });
+  }
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);
@@ -233,6 +286,8 @@ function sendData() {
   postData.append('title', titleInput.value);
   postData.append('location', locationInput.value);
   postData.append('file', picture, postDataId+'.png');
+  postData.append('rawLocationLat', fetchedLocation.lat);
+  postData.append('rawLocationLon', fetchedLocation.lon);
 
   fetch('https://us-central1-photoload-98c58.cloudfunctions.net/storePostData', {
     method: 'POST',
@@ -269,7 +324,8 @@ form.addEventListener('submit', function (evt) {
         id: new Date().toISOString(),
         title: titleInput.value,
         location: locationInput.value,
-        picture: picture
+        picture: picture,
+        rawLocation: fetchedLocation
       };
       writeData('sync-posts', post).then(function() {
         sw.sync.register('sync-new-posts');

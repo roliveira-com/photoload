@@ -2,7 +2,6 @@ var functions = require('firebase-functions');
 var admin = require('firebase-admin');
 var cors = require('cors')({origin:true});
 var webpush = require('web-push');
-var formidable = require('formidable')
 var fs = require('fs');
 var uuid = require('uuid-v4')
 var os = require("os");
@@ -69,7 +68,7 @@ exports.storePostData = functions.https.onRequest(function(req, res) {
           if (!err) {
             var newPost = admin.database().ref('posts').push();
             var imgUrl = 'https://firebasestorage.googleapis.com/v0/b/'+bucket.name+'/o/'+encodeURIComponent(uploadedFile.name)+'?alt=media&token='+fileId;
-            var postData = new post.Novo(newPost.key, fields.title, fields.location, imgUrl);
+            var postData = new post.Novo(newPost.key, fields.title, fields.location, fields.rawLocationLat, fields.rawLocationLon, imgUrl);
             newPost.set(postData)
             .then(function(){
               webpush.setVapidDetails(

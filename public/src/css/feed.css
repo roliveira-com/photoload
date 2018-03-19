@@ -29,6 +29,7 @@
 }
 
 .post-detail__image{
+  background-size: cover;
   height: 180px;
   margin: 0 auto;
   width: 300px;
@@ -57,14 +58,16 @@
   margin: 10px auto;
 }
 
-#create-post video, #create-post canvas {
+#create-post video, 
+#create-post canvas {
   width: 512px;
   max-width: 100%;
   display: none;
   margin: auto;
 }
 
-#create-post #pick-image {
+#create-post #pick-image,
+#create-post #location-loader {
   display: none;
 }
 

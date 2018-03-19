@@ -2,7 +2,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/utils.js');
 
 var VERSION = {
-  current : '1.102',
+  current : '1.107',
   earlier : '1.99'
 }
 var CACHE_STATIC = 'photoload-files-v15';
@@ -307,6 +307,8 @@ self.addEventListener('sync', function (event) {
           postData.append('title', post.title);
           postData.append('location', post.location);
           postData.append('file', post.picture, post.id+'.png');
+          postData.append('rawLocationLat', post.rawLocation.lat);
+          postData.append('rawLocationLon', post.rawLocation.lon);
           fetch('https://us-central1-photoload-98c58.cloudfunctions.net/storePostData', {
             method: 'POST',
             body: postData
@@ -386,7 +388,7 @@ self.addEventListener('notificationclose', function(evt){
 self.addEventListener('push', function (event) {
   console.log('Nova Notificação Push recebida!', event);
 
-  var data = { title: 'Novo!', content: 'Você tem atualizações!', url: '/' };
+  var data = { title: 'Novo!', content: 'Você tem atualizações!', url: 'help' };
 
   if (event.data) {
     data = JSON.parse(event.data.text())
