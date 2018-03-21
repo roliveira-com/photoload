@@ -13,7 +13,10 @@ var imagePickerArea = document.querySelector('#pick-image');
 var locationBtn = document.querySelector('#location-btn');
 var locationLoader = document.querySelector('#location-loader');
 var picture = undefined;
-var fetchedLocation = undefined;
+var fetchedLocation = {
+                        rawLocationLat : null,
+                        rawLocationLon : null
+                      };
 
 locationBtn.addEventListener('click', function (evt) {
   if (!('geolocation' in navigator)) {
@@ -27,8 +30,8 @@ locationBtn.addEventListener('click', function (evt) {
     locationBtn.style.display = 'inline';
     locationLoader.style.display = 'none';
     fetchedLocation = {
-      lat: position.coords.latitude,
-      lon: position.coords.longitude
+      rawLocationLat: position.coords.latitude,
+      rawLocationLon: position.coords.longitude
     };
     locationInput.value = 'In Sao Paulo'
     document.querySelector('#manual-location').classList.add('is-focused');
@@ -37,8 +40,8 @@ locationBtn.addEventListener('click', function (evt) {
     locationBtn.style.display = 'inline';
     locationLoader.style.display = 'none';
     fetchedLocation = {
-      lat: null,
-      lon: null
+      rawLocationLat: null,
+      rawLocationLon: null
     };
   }, {timeout: 10000})
 })
@@ -104,6 +107,7 @@ function openCreatePostModal() {
   createPostArea.style.display = 'block';
   setTimeout(function(){
     createPostArea.style.transform = 'translateY(0)';
+    captureButton.style.display = 'inline'
     initMedia();
     initLocation();
   },1)
@@ -145,7 +149,6 @@ function closeCreatePostModal() {
   canvasElement.style.display = 'none'
   createPostArea.style.display = 'none';
   locationBtn.style.display = 'inline';
-  captureButton.style.inline = 'inline';
   // locationLoader.style.display = 'none';
   if (videoPlayer.srcObject){
     videoPlayer.srcObject.getVideoTracks().forEach(function (track) {
@@ -286,8 +289,8 @@ function sendData() {
   postData.append('title', titleInput.value);
   postData.append('location', locationInput.value);
   postData.append('file', picture, postDataId+'.png');
-  postData.append('rawLocationLat', fetchedLocation.lat);
-  postData.append('rawLocationLon', fetchedLocation.lon);
+  postData.append('rawLocationLat', fetchedLocation.lat || locationInput.value);
+  postData.append('rawLocationLon', fetchedLocation.lon || locationInput.value);
 
   fetch('https://us-central1-photoload-98c58.cloudfunctions.net/storePostData', {
     method: 'POST',

@@ -49,7 +49,7 @@ function clearStorageItem(st,id) {
     return transaction.complete;
   })
   .then(function(){
-    console.log('item deletado')
+    console.log('item'+ id +'deletado')
   })
 }
 
@@ -57,6 +57,21 @@ function postDetailModalFromPush(id) {
   readItem('posts', id).then(function(item){
     utilCreatePostDetailCard(item);
     utilOpenDetailModal();
+  })
+}
+
+function updateCacheFromNetwork(args, options){
+  return fetch(args.event.request).then(function(res){
+    var clonedRes = res.clone();
+    clearStorage(options.cacheName).then(function(){
+      return clonedRes.json();
+    })
+    .then(function(data){
+      for(var key in data){
+        writeData(options.cacheName,data[key])
+      }
+    })
+    return res;
   })
 }
 

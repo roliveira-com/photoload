@@ -1,6 +1,10 @@
 importScripts('workbox-sw.prod.v2.1.3.js');
+importScripts('/src/js/idb.js');
+importScripts('/src/js/utils.js');
+importScripts('/src/js/worker.js');
 
 const workboxSW = new self.WorkboxSW();
+const worker = new Worker();
 
 workboxSW.router.registerRoute(/.*(?:googleapis|gstatic)\.com.*$/, workboxSW.strategies.staleWhileRevalidate({
   cacheName: 'google-fonts',
@@ -18,6 +22,53 @@ workboxSW.router.registerRoute(/.*(?:firebasestorage\.googleapis)\.com.*$/, work
   cacheName: 'post-images'
 }));
 
+workboxSW.router.registerRoute('https://photoload-98c58.firebaseio.com/posts.json', function(args){
+  worker.updateCacheFromNetwork(args, {
+    cacheName: 'posts'
+  })
+});
+
+// workboxSW.router.registerRoute(
+//   function(routeData){
+//     return (routeData.event.request.headers.get('accept').includes('text/html'));
+//   }, 
+//   function(args){
+//     worker.redirectToOfflineAsset(args, {
+//       cacheName: 'worker-dinamico',
+//       assetPath: '/offline.html'
+//     })
+//   }
+// );
+
+workboxSW.router.registerRoute(
+  function(routeData){
+    return (routeData.event.request.headers.get('accept').includes('text/html'));
+  }, 
+  function(args){
+    return caches.match(args.event.request)
+      .then(function (response) {
+        if (response) {
+          return response;
+        } else {
+          return fetch(args.event.request)
+            .then(function (res) {
+              return caches.open('dynamic')
+                .then(function (cache) {
+                  cache.put(args.event.request.url, res.clone());
+                  return res;
+                })
+            })
+            .catch(function (err) {
+              return caches.match('/offline.html')
+                .then(function (cache) {
+                  return cache;
+                })
+            })
+          }
+        })
+  }
+);
+
 workboxSW.precache([
   {
     "url": "404.html",
@@ -29,7 +80,7 @@ workboxSW.precache([
   },
   {
     "url": "index.html",
-    "revision": "4f2488d063a4d9a14a7fbf6373da69fd"
+    "revision": "b1f94929b805414759681f72849e6d0e"
   },
   {
     "url": "manifest.json",
@@ -41,7 +92,7 @@ workboxSW.precache([
   },
   {
     "url": "service-worker.js",
-    "revision": "f76fbb40724abeb165ad7cc036760ef6"
+    "revision": "faf9f22b700cb0b26d66fa71b26eaaff"
   },
   {
     "url": "src/css/app.css",
@@ -65,7 +116,7 @@ workboxSW.precache([
   },
   {
     "url": "src/js/feed.js",
-    "revision": "836c079a4a503b74bcb004f3a07789ab"
+    "revision": "9ac66dfd782ba0a59e651c6368073331"
   },
   {
     "url": "src/js/fetch.js",
@@ -85,15 +136,19 @@ workboxSW.precache([
   },
   {
     "url": "src/js/utils.js",
-    "revision": "9dfb951270508a516edc09e2db279ff0"
+    "revision": "a2de55e1f5da8f9247ff91acda051ed6"
+  },
+  {
+    "url": "src/js/worker.js",
+    "revision": "c0b7b6092c3210cf6727ef9b316787f2"
   },
   {
     "url": "sw-base.js",
-    "revision": "2a2639b0e80c5acf7230f7d66a02fd7b"
+    "revision": "d298964a7f5514c86861ec934c178ae5"
   },
   {
     "url": "sw.js",
-    "revision": "9f6b8befd9be530f80a1cde2f41b9d9e"
+    "revision": "d9bf6054130671325eea3a17627635b4"
   },
   {
     "url": "workbox-sw.prod.v2.1.3.js",
@@ -116,3 +171,100 @@ workboxSW.precache([
     "revision": "0f282d64b0fb306daf12050e812d6a19"
   }
 ]);
+
+self.addEventListener('sync', function (event) {
+  if (event.tag === 'sync-new-posts'){
+    event.waitUntil(
+      readAllData('sync-posts').then(function(posts){
+        var postDataToDelete = [];
+        for (var post of posts){
+          var postData = new FormData();
+          postData.append('id', post.id);
+          postData.append('title', post.title);
+          postData.append('location', post.location);
+          postData.append('file', post.picture, post.id+'.png');
+          postData.append('rawLocationLat', post.rawLocation.lat);
+          postData.append('rawLocationLon', post.rawLocation.lon);
+
+          // salvando ids do sync-posts para deleção
+          postDataToDelete.push(post.id);
+          console.log('Array de items a serem deletados', postDataToDelete)
+          fetch('https://us-central1-photoload-98c58.cloudfunctions.net/storePostData', {
+            method: 'POST',
+            body: postData
+          }).then(function (res) {
+            if(res.ok){
+              res.json().then(function(res_data){
+                writeData('posts', res_data).then(function(data_saved){
+                  clearStorageItem('sync-posts', postDataToDelete[0]);
+                  postDataToDelete.splice(0,1)
+                })
+              })
+            }
+          }).catch(function(err){
+            console.log('[Service Workers] Erro ao enviar o post !', err);
+          })// ENF OF fetch() promise
+        } // ENF OF for loop
+      }) // ENF OF readAllData() promise
+    ) // ENF OF waitUntil()
+  } // ENF OF if()
+});
+
+self.addEventListener('notificationclick', function(evt){
+  var notification = evt.notification;
+  var action = evt.action;
+
+  if(action == 'confirm'){
+    notification.close();
+
+  }else{
+    evt.waitUntil(
+      clients.matchAll().then(function(clis){
+
+        clis.forEach(function(theClient){
+          sendMessageToClient(theClient, notification.data.postkey);
+        })
+
+        var client = clis.find(function(c){
+          return c.visibilityState === 'visible';
+        })
+
+        if(client !== undefined){      
+          console.log('Post Key vindo do push', notification.data.postkey);
+          client.focus();
+        }else{
+          console.log('Post Key vindo do push', notification.data.postkey);
+        }
+        notification.close();
+      })
+    )
+
+  }
+});
+
+self.addEventListener('notificationclose', function(evt){
+  console.log('[Service Worker] Usuário fechou a notificação', evt)
+})
+
+self.addEventListener('push', function (event) {
+
+  var data = { title: 'Novo!', content: 'Você tem atualizações!', url: 'help' };
+
+  if (event.data) {
+    data = JSON.parse(event.data.text())
+  };
+
+  var options = {
+    body: data.content,
+    icon: '/src/images/icons/app-icon-96x96.png',
+    badge: '/src/images/icons/app-icon-96x96.png',
+    data: {
+      url: data.url,
+      postkey: data.postkey
+    }
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  )
+})

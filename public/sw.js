@@ -164,7 +164,7 @@ self.addEventListener('fetch', function (event) {
                 // ...e guardamos e resposta no Cache Storage e...
                 return caches.open('photoload-dynamic-' + VERSION.current)
                   .then(function (cache) {
-                    cache.put(event.request, res.clone());
+                    cache.put(event.request.url, res.clone());
                     return res;
                   })
               })
