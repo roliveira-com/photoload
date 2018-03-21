@@ -212,7 +212,7 @@ function createCard(data) {
 // Quando os dados são recebidos, esta funcção trata de popular os cards e inderi-los na UI, atualizando a view
 function updateUI(data) {
   clearCards();
-  for (let i = 0; i < data.length; i++) {
+  for (var i = 0; i < data.length; i++) {
     createCard(data[i])
   }
 }

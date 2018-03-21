@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "http-server -c-1 --p 3000",
-    "worker": "workbox inject:manifest"
+    "worker": "workbox inject:manifest",
+    "minify": "uglifyjs public/src/js/app.js -o public/src/js/app.min.js --compress --mangle && uglifyjs public/src/js/feed.js -o public/src/js/feed.min.js --compress --mangle && uglifyjs public/src/js/detail.js -o public/src/js/detail.min.js --compress --mangle",
+    "build": "npm run minify && npm run worker"
   },
   "keywords": [
     "pwa",
@@ -19,6 +21,7 @@
   "license": "ISC",
   "devDependencies": {
     "http-server": "^0.10.0",
+    "uglify-js": "^3.3.16",
     "workbox-cli": "^2.1.3"
   }
 }
