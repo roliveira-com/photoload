@@ -20,10 +20,6 @@ workboxSW.router.registerRoute(/.*(?:firebasestorage\.googleapis)\.com.*$/, work
 
 workboxSW.precache([
   {
-    "url": "404.html",
-    "revision": "0a27a4163254fc8fce870c8cc3a3f94f"
-  },
-  {
     "url": "favicon.ico",
     "revision": "2cab47d9e04d664d93c8d91aec59e812"
   },
@@ -41,7 +37,7 @@ workboxSW.precache([
   },
   {
     "url": "service-worker.js",
-    "revision": "f76fbb40724abeb165ad7cc036760ef6"
+    "revision": "9ed55dde3dbe06822d63a967e45f9c8f"
   },
   {
     "url": "src/css/app.css",
