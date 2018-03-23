@@ -14,9 +14,9 @@ var locationBtn = document.querySelector('#location-btn');
 var locationLoader = document.querySelector('#location-loader');
 var picture = undefined;
 var fetchedLocation = {
-                        rawLocationLat : null,
-                        rawLocationLon : null
-                      };
+  rawLocationLat : null,
+  rawLocationLon : null
+};
 
 locationBtn.addEventListener('click', function (evt) {
   if (!('geolocation' in navigator)) {

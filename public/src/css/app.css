@@ -9,3 +9,24 @@
 .enable-notifications{
   display: none;
 }
+
+.home-hero{
+  background-color: rgb(255,171,64);
+  display: flex;
+  padding: 15px;
+}
+
+.home-hero h1{
+  font-size: 28px;
+}
+
+.home-hero h1 img{
+  position: relative;
+  margin-right: 5px;
+  top: -5px;
+  width: 40px;
+}
+
+.mdl-layout__header .mdl-layout__drawer-button{
+  color: #FFF;
+}

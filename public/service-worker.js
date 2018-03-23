@@ -18,10 +18,6 @@ workboxSW.router.registerRoute(/.*(?:material|\.css).*$/, workboxSW.strategies.s
   cacheName: 'material-css'
 }));
 
-// workboxSW.router.registerRoute('https://code.getmdl.io/1.3.0/material.cyan-orange.min.css', workboxSW.strategies.staleWhileRevalidate({
-//   cacheName: 'material-css'
-// }));
-
 workboxSW.router.registerRoute(/.*(?:firebasestorage\.googleapis)\.com.*$/, workboxSW.strategies.staleWhileRevalidate({
   cacheName: 'post-images'
 }));
@@ -32,6 +28,7 @@ workboxSW.router.registerRoute('https://photoload-98c58.firebaseio.com/posts.jso
     cacheName: 'posts'
   })
 });
+
 
 workboxSW.router.registerRoute(
   function(routeData){
@@ -45,33 +42,10 @@ workboxSW.router.registerRoute(
   }
 );
 
-// workboxSW.router.registerRoute(
-//   function(routeData){
-//     return (routeData.event.request.headers.get('accept').includes('text/html'));
-//   }, 
-//   function(args){
-//     return caches.match(args.event.request)
-//       .then(function (response) {
-//         if (response) {
-//           return response;
-//         } else {
-//           return fetch(args.event.request)
-//             .then(function (res) {
-//               return caches.open('dynamic')
-//                 .then(function (cache) {
-//                   cache.put(args.event.request.url, res.clone());
-//                   return res;
-//                 })
-//             })
-//             .catch(function (err) {
-//               return caches.match('/offline.html')
-//                 .then(function (cache) {
-//                   return cache;
-//                 })
-//             })
-//           }
-//         })
-//   }
+// workboxSW.router.registerRoute('https://us-central1-photoload-98c58.cloudfunctions.net/storePostData',workbox.strategies.networkOnly({
+//     plugins: [bgSyncPlugin]
+//   }),
+//   'POST'
 // );
 
 workboxSW.precache([
@@ -81,7 +55,7 @@ workboxSW.precache([
   },
   {
     "url": "index.html",
-    "revision": "cc3aadcf33fdee4116fd6ad2695c3617"
+    "revision": "790c82cd39c9e895b3e438cfcc3e5241"
   },
   {
     "url": "manifest.json",
@@ -93,11 +67,11 @@ workboxSW.precache([
   },
   {
     "url": "service-worker.js",
-    "revision": "b8b6adacc69ecd846551a76598a58b1c"
+    "revision": "ad1f1b12db89ff2cbcea3510e7d55690"
   },
   {
     "url": "src/css/app.css",
-    "revision": "6d09f74487baae2843eb6b8983064f6f"
+    "revision": "c9fa17c2ac1c4e6239e3d32d5f95d7a8"
   },
   {
     "url": "src/css/feed.css",
@@ -125,7 +99,7 @@ workboxSW.precache([
   },
   {
     "url": "src/js/build/feed.min.js",
-    "revision": "9f56dbcbd709b10eb642b0885439ba38"
+    "revision": "8e3010d45f9b400a07f4057fd199661c"
   },
   {
     "url": "src/js/detail.js",
@@ -137,7 +111,7 @@ workboxSW.precache([
   },
   {
     "url": "src/js/feed.js",
-    "revision": "3700eb5d68cf3e04904f4325e48da18f"
+    "revision": "30af5b80b47f7116d26e13149084d9c4"
   },
   {
     "url": "src/js/feed.min.js",
@@ -156,6 +130,10 @@ workboxSW.precache([
     "revision": "713af0c6ce93dbbce2f00bf0a98d0541"
   },
   {
+    "url": "src/js/model/Moments.js",
+    "revision": "7698eccf8ca78dcb82e18eacee99af3c"
+  },
+  {
     "url": "src/js/promise.js",
     "revision": "10c2238dcd105eb23f703ee53067417f"
   },
@@ -165,11 +143,11 @@ workboxSW.precache([
   },
   {
     "url": "src/js/worker.js",
-    "revision": "3a5028d2b7b1cdf2e7c520006a23d3af"
+    "revision": "b83d717901c881f924b543e7ff571130"
   },
   {
     "url": "sw-base.js",
-    "revision": "2fafbf5d03f3ea850951130aa92a1302"
+    "revision": "774f4db8a05d828a1a6cc743b582cbbd"
   },
   {
     "url": "sw.js",

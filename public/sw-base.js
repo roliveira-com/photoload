@@ -29,6 +29,7 @@ workboxSW.router.registerRoute('https://photoload-98c58.firebaseio.com/posts.jso
   })
 });
 
+
 workboxSW.router.registerRoute(
   function(routeData){
     return (routeData.event.request.headers.get('accept').includes('text/html'));
@@ -40,6 +41,12 @@ workboxSW.router.registerRoute(
     })
   }
 );
+
+// workboxSW.router.registerRoute('https://us-central1-photoload-98c58.cloudfunctions.net/storePostData',workbox.strategies.networkOnly({
+//     plugins: [bgSyncPlugin]
+//   }),
+//   'POST'
+// );
 
 workboxSW.precache([]);
 
