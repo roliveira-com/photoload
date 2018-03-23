@@ -80,7 +80,7 @@ workboxSW.precache([
   },
   {
     "url": "index.html",
-    "revision": "3450d6fa7f7a6f401f222ab263aadec2"
+    "revision": "34470bcdd14f2cd05f5762c65300fa37"
   },
   {
     "url": "manifest.json",
@@ -128,7 +128,7 @@ workboxSW.precache([
   },
   {
     "url": "src/js/feed.min.js",
-    "revision": "0700f2c5a714c1a0ba60feaac24932a8"
+    "revision": "9f56dbcbd709b10eb642b0885439ba38"
   },
   {
     "url": "src/js/material.min.js",
@@ -136,43 +136,23 @@ workboxSW.precache([
   }
 ]);
 
-self.addEventListener('sync', function (event) {
-  if (event.tag === 'sync-new-posts'){
-    event.waitUntil(
-      readAllData('sync-posts').then(function(posts){
-        var postDataToDelete = [];
-        for (var post of posts){
-          var postData = new FormData();
-          postData.append('id', post.id);
-          postData.append('title', post.title);
-          postData.append('location', post.location);
-          postData.append('file', post.picture, post.id+'.png');
-          postData.append('rawLocationLat', post.rawLocation.lat);
-          postData.append('rawLocationLon', post.rawLocation.lon);
+worker.backgroundSync(worker.postSyncFormData({
+  syncTag: 'sync-new-posts',
+  syncCache: 'sync-posts',
+  cacheName: 'posts',
+  dataKeys: ['id', 'title', 'location', 'file', 'rawLocationLat', 'rawLocationLon'],
+  postUrl: 'https://us-central1-photoload-98c58.cloudfunctions.net/storePostData'
+}));
 
-          // salvando ids do sync-posts para deleção
-          postDataToDelete.push(post.id);
-          console.log('Array de items a serem deletados', postDataToDelete)
-          fetch('https://us-central1-photoload-98c58.cloudfunctions.net/storePostData', {
-            method: 'POST',
-            body: postData
-          }).then(function (res) {
-            if(res.ok){
-              res.json().then(function(res_data){
-                writeData('posts', res_data).then(function(data_saved){
-                  clearStorageItem('sync-posts', postDataToDelete[0]);
-                  postDataToDelete.splice(0,1)
-                })
-              })
-            }
-          }).catch(function(err){
-            console.log('[Service Workers] Erro ao enviar o post !', err);
-          })// ENF OF fetch() promise
-        } // ENF OF for loop
-      }) // ENF OF readAllData() promise
-    ) // ENF OF waitUntil()
-  } // ENF OF if()
-});
+// self.addEventListener('sync', function (event) {
+//   worker.postSyncFormData(event,{
+//     syncTag: 'sync-new-posts',
+//     syncCache: 'sync-posts',
+//     cacheName: 'posts',
+//     dataKeys: ['id', 'title', 'location', 'file', 'rawLocationLat', 'rawLocationLon'],
+//     postUrl: 'https://us-central1-photoload-98c58.cloudfunctions.net/storePostData'
+//   })
+// });
 
 self.addEventListener('notificationclick', function(evt){
   var notification = evt.notification;

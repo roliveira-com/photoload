@@ -60,6 +60,18 @@ function postDetailModalFromPush(id) {
   })
 }
 
+function deleteSyncPosts(id=null){
+  var postDataToDelete = [];
+  if(id !== null){
+    postDataToDelete.push(id);
+
+  }else {
+    clearStorageItem('sync-posts', postDataToDelete[0]);
+    postDataToDelete.splice(0,1)
+    
+  }
+}
+
 function updateCacheFromNetwork(args, options){
   return fetch(args.event.request).then(function(res){
     var clonedRes = res.clone();

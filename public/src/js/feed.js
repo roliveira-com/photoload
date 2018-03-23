@@ -315,7 +315,7 @@ form.addEventListener('submit', function (evt) {
   evt.preventDefault();
 
   if (titleInput.value.trim() === '' || locationInput.value.trim() === ''){
-    alert('digite algum coisa!')
+    alert('digite alguma coisa!')
     return
   }
 
@@ -327,8 +327,9 @@ form.addEventListener('submit', function (evt) {
         id: new Date().toISOString(),
         title: titleInput.value,
         location: locationInput.value,
-        picture: picture,
-        rawLocation: fetchedLocation
+        file: picture,
+        rawLocationLat: fetchedLocation.rawLocationLat || locationInput.value,
+        rawLocationLon: fetchedLocation.rawLocationLon || locationInput.value
       };
       writeData('sync-posts', post).then(function() {
         sw.sync.register('sync-new-posts');

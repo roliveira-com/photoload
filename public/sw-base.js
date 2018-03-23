@@ -72,41 +72,13 @@ workboxSW.router.registerRoute(
 workboxSW.precache([]);
 
 self.addEventListener('sync', function (event) {
-  if (event.tag === 'sync-new-posts'){
-    event.waitUntil(
-      readAllData('sync-posts').then(function(posts){
-        var postDataToDelete = [];
-        for (var post of posts){
-          var postData = new FormData();
-          postData.append('id', post.id);
-          postData.append('title', post.title);
-          postData.append('location', post.location);
-          postData.append('file', post.picture, post.id+'.png');
-          postData.append('rawLocationLat', post.rawLocation.lat);
-          postData.append('rawLocationLon', post.rawLocation.lon);
-
-          // salvando ids do sync-posts para deleção
-          postDataToDelete.push(post.id);
-          console.log('Array de items a serem deletados', postDataToDelete)
-          fetch('https://us-central1-photoload-98c58.cloudfunctions.net/storePostData', {
-            method: 'POST',
-            body: postData
-          }).then(function (res) {
-            if(res.ok){
-              res.json().then(function(res_data){
-                writeData('posts', res_data).then(function(data_saved){
-                  clearStorageItem('sync-posts', postDataToDelete[0]);
-                  postDataToDelete.splice(0,1)
-                })
-              })
-            }
-          }).catch(function(err){
-            console.log('[Service Workers] Erro ao enviar o post !', err);
-          })// ENF OF fetch() promise
-        } // ENF OF for loop
-      }) // ENF OF readAllData() promise
-    ) // ENF OF waitUntil()
-  } // ENF OF if()
+  worker.postSyncFormData(event,{
+    syncTag: 'sync-new-posts',
+    syncCache: 'sync-posts',
+    cacheName: 'posts',
+    dataKeys: ['id', 'title', 'location', 'file', 'rawLocationLat', 'rawLocationLon'],
+    postUrl: 'https://us-central1-photoload-98c58.cloudfunctions.net/storePostData'
+  })
 });
 
 self.addEventListener('notificationclick', function(evt){
