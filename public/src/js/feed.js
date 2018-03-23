@@ -321,6 +321,27 @@ form.addEventListener('submit', function (evt) {
 
   closeCreatePostModal();
 
+  var moment = new Moments();
+
+  // moment.newMoment(
+  //   titleInput.value,
+  //   locationInput.value,
+  //   picture,
+  //   fetchedLocation.rawLocationLat,
+  //   fetchedLocation.rawLocationLon
+  // )
+  // .then(function(posted){
+  //   moment.momentNotify('new', posted);
+  // })
+  // .catch(function(moment){
+  //   moment.momentNotify('error', {message: backSync});
+  //   moment.saveToSync({
+  //     syncCache: 'sync-moments',
+  //     syncTag: 'syn-new-moments',
+  //     syncData: moment
+  //   })
+  // })
+
   if('serviceWorker' in navigator && 'SyncManager' in window){
     navigator.serviceWorker.ready.then(function (sw) {
       var post = {

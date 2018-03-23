@@ -1,9 +1,9 @@
 module.exports = {
   "globDirectory": "public/",
   "globPatterns": [
-    "**/*.{html,ico,json,css}",
+    "**/*.{html,ico,json,css,js}",
     "src/images/*.{jpg,png}",
-    "src/js/*.min.js"
+    "src/js/build/*.js"
   ],
   "swSrc": "./public/sw-base.js",
   "swDest": "./public/service-worker.js",

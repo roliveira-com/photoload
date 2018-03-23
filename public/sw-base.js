@@ -14,7 +14,7 @@ workboxSW.router.registerRoute(/.*(?:googleapis|gstatic)\.com.*$/, workboxSW.str
   }
 }));
 
-workboxSW.router.registerRoute('https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css', workboxSW.strategies.staleWhileRevalidate({
+workboxSW.router.registerRoute(/.*(?:material|\.css).*$/, workboxSW.strategies.staleWhileRevalidate({
   cacheName: 'material-css'
 }));
 
@@ -22,50 +22,22 @@ workboxSW.router.registerRoute(/.*(?:firebasestorage\.googleapis)\.com.*$/, work
   cacheName: 'post-images'
 }));
 
+
 workboxSW.router.registerRoute('https://photoload-98c58.firebaseio.com/posts.json', function(args){
   worker.updateCacheFromNetwork(args, {
     cacheName: 'posts'
   })
 });
 
-// workboxSW.router.registerRoute(
-//   function(routeData){
-//     return (routeData.event.request.headers.get('accept').includes('text/html'));
-//   }, 
-//   function(args){
-//     worker.redirectToOfflineAsset(args, {
-//       cacheName: 'worker-dinamico',
-//       assetPath: '/offline.html'
-//     })
-//   }
-// );
-
 workboxSW.router.registerRoute(
   function(routeData){
     return (routeData.event.request.headers.get('accept').includes('text/html'));
   }, 
   function(args){
-    return caches.match(args.event.request)
-      .then(function (response) {
-        if (response) {
-          return response;
-        } else {
-          return fetch(args.event.request)
-            .then(function (res) {
-              return caches.open('dynamic')
-                .then(function (cache) {
-                  cache.put(args.event.request.url, res.clone());
-                  return res;
-                })
-            })
-            .catch(function (err) {
-              return caches.match('/offline.html')
-                .then(function (cache) {
-                  return cache;
-                })
-            })
-          }
-        })
+    return worker.redirectToOfflineAsset(args, {
+      cacheName: 'worker-dinamico',
+      assetPath: '/offline.html'
+    })
   }
 );
 
@@ -80,6 +52,7 @@ self.addEventListener('sync', function (event) {
     postUrl: 'https://us-central1-photoload-98c58.cloudfunctions.net/storePostData'
   })
 });
+
 
 self.addEventListener('notificationclick', function(evt){
   var notification = evt.notification;

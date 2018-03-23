@@ -2,41 +2,37 @@ function Worker() {
 
   var methods = {
 
-    // redirectToOfflineAsset : function(args, options){
-    //   return caches.match(args.event.request)
-    //     .then(function (response) {
-    //       if (response) {
-    //         return response;
-    //       } else {
-    //         return fetch(args.event.request)
-    //           .then(function (res) {
-    //             return caches.open(options.cacheName)
-    //               .then(function (cache) {
-    //                 cache.put(args.event.request.url, res.clone());
-    //                 return res;
-    //               })
-    //           })
-    //           .catch(function (err) {
-    //             return caches.match(options.assetPath)
-    //               .then(function (cache) {
-    //                 return cache;
-    //               })
-    //           })
-    //         }
-    //       })
-    // },
+    redirectToOfflineAsset : function(args, options){
+      return caches.match(args.event.request)
+        .then(function (response) {
+          if (response) {
+            return response;
+          } else {
+            return fetch(args.event.request)
+              .then(function (res) {
+                return caches.open(options.cacheName)
+                  .then(function (cache) {
+                    cache.put(args.event.request.url, res.clone());
+                    return res;
+                  })
+              })
+              .catch(function (err) {
+                return caches.match(options.assetPath)
+                  .then(function (cache) {
+                    return cache;
+                  })
+              })
+            }
+          })
+    },
 
     postSyncFormData: function(event, options){
       if (event.tag === options.syncTag){
-
-        event.waitUntil(
-          
-          readAllData(options.syncCache).then(function(posts){
-            
+        event.waitUntil(          
+          readAllData(options.syncCache).then(function(posts){            
             var postDataToDelete = [];
             
             for (var post of posts){
-
               var postData = new FormData();
               
               for(var key in post){
@@ -46,7 +42,6 @@ function Worker() {
               // salvando ids do sync-posts para deleção
               postDataToDelete.push(post.id);
     
-              // console.log('Array de items a serem deletados', postDataToDelete)
               fetch(options.postUrl, {
                 method: 'POST',
                 body: postData
