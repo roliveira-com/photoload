@@ -11,8 +11,8 @@ function Moments() {
         rawLocationLon: input_lon
       }
       
-      return fetch('url', {
-        method: POST,
+      return fetch('https://us-central1-photoload-98c58.cloudfunctions.net/storePostData', {
+        method: 'POST',
         body: the_moment
       })
       .then(function (posted_moment) {

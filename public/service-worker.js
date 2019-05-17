@@ -55,7 +55,7 @@ workboxSW.precache([
   },
   {
     "url": "index.html",
-    "revision": "790c82cd39c9e895b3e438cfcc3e5241"
+    "revision": "e7570ebfae2c0172e0d8ed8b4100fbe0"
   },
   {
     "url": "manifest.json",
@@ -67,7 +67,7 @@ workboxSW.precache([
   },
   {
     "url": "service-worker.js",
-    "revision": "ad1f1b12db89ff2cbcea3510e7d55690"
+    "revision": "c828992430fd993e585429da9806fecb"
   },
   {
     "url": "src/css/app.css",
@@ -99,7 +99,7 @@ workboxSW.precache([
   },
   {
     "url": "src/js/build/feed.min.js",
-    "revision": "8e3010d45f9b400a07f4057fd199661c"
+    "revision": "e07c150a1a36812af41b9b2f9b050778"
   },
   {
     "url": "src/js/detail.js",
@@ -111,7 +111,7 @@ workboxSW.precache([
   },
   {
     "url": "src/js/feed.js",
-    "revision": "30af5b80b47f7116d26e13149084d9c4"
+    "revision": "e99f87017e00133ce16e4f999ebc4a0a"
   },
   {
     "url": "src/js/feed.min.js",
@@ -131,7 +131,7 @@ workboxSW.precache([
   },
   {
     "url": "src/js/model/Moments.js",
-    "revision": "7698eccf8ca78dcb82e18eacee99af3c"
+    "revision": "88e5a4cef6be7a5a494555d60ba5561d"
   },
   {
     "url": "src/js/promise.js",
