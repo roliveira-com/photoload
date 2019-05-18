@@ -1,8 +1,8 @@
 function Moments() {
   var methods = {
 
-    newMoment : function(input_title, input_location, input_picture, input_lat, input_lon) {
-      var the_moment = {
+    new : function(input_title, input_location, input_picture, input_lat, input_lon) {
+      const momentData = {
         id: new Date().toISOString(),
         title: input_title,
         location: input_location,
@@ -10,16 +10,39 @@ function Moments() {
         rawLocationLat: input_lat,
         rawLocationLon: input_lon
       }
+
+      const momentPost = new FormData()
+
+      for (var key in momentData) {
+        momentPost.append(key, momentData[key]);
+      }
       
-      return fetch('https://us-central1-photoload-98c58.cloudfunctions.net/storePostData', {
+      fetch('https://us-central1-photoload-98c58.cloudfunctions.net/storePostData', {
         method: 'POST',
-        body: the_moment
+        body: momentPost
       })
       .then(function (posted_moment) {
-        return posted_moment
+        console.log('Post Salvo', posted_moment);
+        var snackbarContainer = document.querySelector('#confirmation-toast');
+        snackbarContainer.MaterialSnackbar.showSnackbar({
+          message: 'Post salvo com sucesso!'
+        });
       })
       .catch(function (err) {
-        return the_moment
+        if('serviceWorker' in navigator && 'SyncManager' in window){
+          navigator.serviceWorker.ready.then(function (sw) {
+            console.log('Registro do Background sync');
+            writeData('sync-posts', momentData).then(function () {
+              return sw.sync.register('sync-new-posts');
+            }).then(function () {
+              var snackbarContainer = document.querySelector('#confirmation-toast');
+              var data = {message: 'Seu post foi salvo para ser sincronizado mais tarde'};
+              snackbarContainer.MaterialSnackbar.showSnackbar(data);
+            }).catch(function (err) {
+              console.log(err)
+            })
+          });
+        }
       })
     },
 

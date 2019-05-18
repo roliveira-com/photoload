@@ -8,7 +8,7 @@ var os = require("os");
 var Busboy = require("busboy");
 var path = require('path');
 
-var post = require('./model/post.model');
+var Post = require('./model/post.model');
 var serviceAccount = require('./photoload_key.json');
 var webPushPrivateKey = require('./webpushprivate_key');
 
@@ -68,7 +68,7 @@ exports.storePostData = functions.https.onRequest(function(req, res) {
           if (!err) {
             var newPost = admin.database().ref('posts').push();
             var imgUrl = 'https://firebasestorage.googleapis.com/v0/b/'+bucket.name+'/o/'+encodeURIComponent(uploadedFile.name)+'?alt=media&token='+fileId;
-            var postData = new post.Novo(newPost.key, fields.title, fields.location, fields.rawLocationLat, fields.rawLocationLon, imgUrl);
+            var postData = new Post.novo(newPost.key, fields.title, fields.location, fields.rawLocationLat, fields.rawLocationLon, imgUrl);
             newPost.set(postData)
             .then(function(){
               webpush.setVapidDetails(

@@ -1,3 +1,4 @@
+// REVISION 12
 function Worker() {
 
   var methods = {
@@ -27,6 +28,7 @@ function Worker() {
     },
 
     postSyncFormData: function(event, options){
+      console.log('Evento sync disparado!')
       if (event.tag === options.syncTag){
         event.waitUntil(          
           readAllData(options.syncCache).then(function(posts){            

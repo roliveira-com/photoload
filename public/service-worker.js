@@ -59,7 +59,7 @@ workboxSW.precache([
   },
   {
     "url": "manifest.json",
-    "revision": "d11c7965f5cfba711c8e74afa6c703d7"
+    "revision": "a25dcc75cff2ea9e820587c1f15405d0"
   },
   {
     "url": "offline.html",
@@ -67,7 +67,7 @@ workboxSW.precache([
   },
   {
     "url": "service-worker.js",
-    "revision": "c828992430fd993e585429da9806fecb"
+    "revision": "3f1f85aaf02ebf5935726b7b9584d6bb"
   },
   {
     "url": "src/css/app.css",
@@ -83,7 +83,7 @@ workboxSW.precache([
   },
   {
     "url": "src/js/app.js",
-    "revision": "b0af1b894c76d55f0acb8a9bb3aef374"
+    "revision": "36ec184ec76b2e7485f2ff11748c5953"
   },
   {
     "url": "src/js/app.min.js",
@@ -91,19 +91,19 @@ workboxSW.precache([
   },
   {
     "url": "src/js/build/app.min.js",
-    "revision": "955f21da66f89b2a91867a36a2c8b1c6"
+    "revision": "eee6eff269d8707d4a6c0eecaa5b7e37"
   },
   {
     "url": "src/js/build/detail.min.js",
-    "revision": "5adaebd31ffc42b3266931da1f144345"
+    "revision": "22282c6deb4a4c70f57b12a3ad344d69"
   },
   {
     "url": "src/js/build/feed.min.js",
-    "revision": "e07c150a1a36812af41b9b2f9b050778"
+    "revision": "39d2666a834657aacab0a789d26a916b"
   },
   {
     "url": "src/js/detail.js",
-    "revision": "88d1031b1c9978ee25e2751611f96b24"
+    "revision": "8d37280fb2d3ef89d18f22dea7fe1aec"
   },
   {
     "url": "src/js/detail.min.js",
@@ -111,7 +111,7 @@ workboxSW.precache([
   },
   {
     "url": "src/js/feed.js",
-    "revision": "e99f87017e00133ce16e4f999ebc4a0a"
+    "revision": "3f2bd32f37e388cf8c7235a31eb939bd"
   },
   {
     "url": "src/js/feed.min.js",
@@ -131,7 +131,7 @@ workboxSW.precache([
   },
   {
     "url": "src/js/model/Moments.js",
-    "revision": "88e5a4cef6be7a5a494555d60ba5561d"
+    "revision": "39571d62187af6268c5fa7b2d41c9049"
   },
   {
     "url": "src/js/promise.js",
@@ -143,7 +143,7 @@ workboxSW.precache([
   },
   {
     "url": "src/js/worker.js",
-    "revision": "b83d717901c881f924b543e7ff571130"
+    "revision": "e0519fc0fb5f794c62cdff6cd2264bcc"
   },
   {
     "url": "sw-base.js",

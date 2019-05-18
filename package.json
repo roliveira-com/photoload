@@ -1,7 +1,7 @@
 {
-  "name": "pwa-complete-guide",
-  "version": "1.0.0",
-  "description": "A complete guide to PWAs. Building a simple Instagram clone.",
+  "name": "Photoload",
+  "version": "1.0.27",
+  "description": "Kind'a instagram as Progressive Web App",
   "main": "index.js",
   "scripts": {
     "start": "http-server -c-1 --p 3000",
@@ -17,7 +17,7 @@
     "complete",
     "tutorial"
   ],
-  "author": "Maximilian Schwarzmüller",
+  "author": "Rodrigo Oliveira",
   "license": "ISC",
   "devDependencies": {
     "http-server": "^0.10.0",

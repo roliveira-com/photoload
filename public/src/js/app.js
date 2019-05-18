@@ -6,6 +6,17 @@ if (!window.Promise) {
   window.Promise = Promise;
 }
 
+function showSubscription() {
+  navigator.serviceWorker.ready
+    .then(function (worker) {
+      reg = worker;
+      return reg.pushManager.getSubscription();
+    })
+    .then(function (sub) {
+      console.log('Inscrição do Push Manager', sub)
+    })
+}
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker
     .register('/service-worker.js')
@@ -15,6 +26,8 @@ if ('serviceWorker' in navigator) {
     .catch(function(err) {
       console.log(err);
     });
+
+    showSubscription();
 }
 
 window.addEventListener('beforeinstallprompt', function(event) {

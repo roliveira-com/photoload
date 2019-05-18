@@ -6,7 +6,6 @@ if('serviceWorker' in navigator){
   // Handler for messages coming from the service worker
   navigator.serviceWorker.addEventListener('message', function(event){
       console.log("Post key vinda do SW: " + event.data);
-      // event.ports[0].postMessage("Client 1 Says 'Hello back!'");
       readItem('posts', event.data).then(function(item){
         console.log('Objeto Retornado do IndexDB:', item)
         createPostDetailCard(item);

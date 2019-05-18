@@ -209,7 +209,7 @@ function createCard(data) {
 }
 
 
-// Quando os dados são recebidos, esta funcção trata de popular os cards e inderi-los na UI, atualizando a view
+// Quando os dados são recebidos, esta funcção trata de popular os cards e inseri-los na UI, atualizando a view
 function updateUI(data) {
   clearCards();
   for (var i = 0; i < data.length; i++) {
@@ -234,6 +234,7 @@ fetch('https://photoload-98c58.firebaseio.com/posts.json')
     for (var key in data) {
       dataArray.push(data[key])
     }
+    dataArray.reverse();
     updateUI(dataArray);
     bindCardDetailsListener();
   });
@@ -323,47 +324,36 @@ form.addEventListener('submit', function (evt) {
 
   var moment = new Moments();
 
-  moment.newMoment(
+  moment.new(
     titleInput.value,
     locationInput.value,
     picture,
     fetchedLocation.rawLocationLat,
     fetchedLocation.rawLocationLon
-  )
-  .then(function(posted){
-    moment.momentNotify('new', posted);
-  })
-  .catch(function(moment){
-    moment.momentNotify('error', {message: 'backSync'});
-    moment.saveToSync({
-      syncCache: 'sync-moments',
-      syncTag: 'syn-new-moments',
-      syncData: moment
-    })
-  })
+  );
 
-  if('serviceWorker' in navigator && 'SyncManager' in window){
-    navigator.serviceWorker.ready.then(function (sw) {
-      var post = {
-        id: new Date().toISOString(),
-        title: titleInput.value,
-        location: locationInput.value,
-        file: picture,
-        rawLocationLat: fetchedLocation.rawLocationLat || locationInput.value,
-        rawLocationLon: fetchedLocation.rawLocationLon || locationInput.value
-      };
-      writeData('sync-posts', post).then(function() {
-        sw.sync.register('sync-new-posts');
-      }).then(function () {
-        var snackbarContainer = document.querySelector('#confirmation-toast');
-        var data = {message: 'Seu post foi salvo para ser sincronizado mais tarde'};
-        snackbarContainer.MaterialSnackbar.showSnackbar(data);
-      }).catch(function (err) {
-        console.log(err)
-      })
-    });
-  }else{
-    sendData()
-  }
+  // if('serviceWorker' in navigator && 'SyncManager' in window){
+  //   navigator.serviceWorker.ready.then(function (sw) {
+  //     var post = {
+  //       id: new Date().toISOString(),
+  //       title: titleInput.value,
+  //       location: locationInput.value,
+  //       file: picture,
+  //       rawLocationLat: fetchedLocation.rawLocationLat || locationInput.value,
+  //       rawLocationLon: fetchedLocation.rawLocationLon || locationInput.value
+  //     };
+  //     writeData('sync-posts', post).then(function() {
+  //       sw.sync.register('sync-new-posts');
+  //     }).then(function () {
+  //       var snackbarContainer = document.querySelector('#confirmation-toast');
+  //       var data = {message: 'Seu post foi salvo para ser sincronizado mais tarde'};
+  //       snackbarContainer.MaterialSnackbar.showSnackbar(data);
+  //     }).catch(function (err) {
+  //       console.log(err)
+  //     })
+  //   });
+  // }else{
+  //   sendData()
+  // }
 
 });

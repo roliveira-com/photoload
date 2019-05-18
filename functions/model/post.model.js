@@ -1,4 +1,4 @@
-exports.Novo = function(id, title, location, rawLat, rawLon, image){
+exports.novo = function(id, title, location, rawLat, rawLon, image){
   return {
     id: id,
     title: title,
